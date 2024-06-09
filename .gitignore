@@ -69,5 +69,8 @@ WeChatLive/Client/Library/
 WeChatLive/Client/.vsconfig
 WeChatLive/Client/Logs/
 WeChatLive/Client/UserSettings/
+WeChatLive/Client/Temp/
+WeChatLive/Client/.idea/
+WeChatLive/Client/exe/
 Test/
 资料/
