@@ -131,9 +131,8 @@ public class Timer{
         TimerEvent timerEvent = null;
         if (_timerEventDic.TryGetValue(uniqueId, out timerEvent))
         {
-            return;
+            timerEvent.timerState = state;
         }
-        timerEvent.timerState = state;
     }
 
     // 增加倒计时
