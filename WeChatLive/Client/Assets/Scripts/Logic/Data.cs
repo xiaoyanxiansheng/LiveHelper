@@ -1,10 +1,26 @@
 ﻿using System.Collections.Generic;
 using System;
+using UnityEngine.Serialization;
 using static Data;
 
 public class Data
 {
-    #region 数据结构
+    #region 临时数据 方便访问
+    
+    /// <summary>
+    /// 直播间缓存
+    /// </summary>
+    public static class LiveMsgInfo
+    {
+        public static string objectId;
+        public static string objectNonceId;
+        public static string finder_username;
+        public static string live_id;
+        public static string live_cookies;
+        public static string req_url;
+    }
+    #endregion
+    
     /// <summary>
     /// 头像信息
     /// </summary>
@@ -16,18 +32,39 @@ public class Data
 
         // Server
         public string IconUrl;
-        public string Name;
+        public string NickName;
+        public string UserName;
     }
-    public List<LoginInfo> headInfos = new List<LoginInfo>() 
+    public List<LoginInfo> loginInfos = new List<LoginInfo>() 
     {
         // 测试数据
         new LoginInfo() 
         {
             port = 3001,
             IconUrl = "https://cdn-icons-png.flaticon.com/256/1077/1077114.png",
-            Name = "测试名称"
+            NickName = "测试名称"
         },
     };
+    
+    public class VirtualUserInfo
+    {
+        public string id;
+        public string NickName;
+        public string IconUrl;
+    }
+    public List<VirtualUserInfo> virtualUserInfos = new List<VirtualUserInfo>();
+    /// <summary>
+    /// TODO 需要一个合适的时间
+    /// </summary>
+    public void CreateVirtualUser()
+    {
+        // 随机创建
+        for (int i = 0; i < virtualUserInfos.Count; i++)
+        {
+            Protocol.Client2Server_FinderliveSetSockPuppetattr(loginInfos[0].port,virtualUserInfos[i]);
+            
+        }
+    }
 
     public class UserSayInfo
     {
@@ -44,16 +81,18 @@ public class Data
     [Serializable]
     public class RoomInfo
     {
-        public string IconUrl;
-        public int OnlineMember;
-        public int LikeCount;
+        public string IconUrl;              // 头像
+        public string ParticipantCount;     // 参数人数
+        public string OnlineCount;          // 在线人数
+        public string LikeCount;            // 点赞次数
     }
     public RoomInfo roomInfo = new RoomInfo()
     {
         // 测试数据
         IconUrl = "https://uxwing.com/wp-content/themes/uxwing/download/hand-gestures/good-icon.png",
-        OnlineMember = 666,
-        LikeCount = 888
+        ParticipantCount = "0",
+        OnlineCount = "888",
+        LikeCount = "888",
     };
     // TODO测试数据
 
@@ -194,18 +233,26 @@ public class Data
     /// <summary>
     /// 留言信息
     /// </summary>
+    public class MessageInfoItem
+    {
+        public string NickName;
+        public string Content;
+    }
     [Serializable]
     public class MessageInfo
     {
         public bool AutoToggle;
-        public List<string> messages;
+        public List<MessageInfoItem> messages;
     }
     public MessageInfo messageInfo = new MessageInfo()
     {
         AutoToggle = false,
-        messages = new List<string>()
+        messages = new List<MessageInfoItem>()
         {
-            "1","2","啊","主播你好啊","我是小gege"
+            new MessageInfoItem(){NickName = "小王" , Content = "珠宝加油"},
+            new MessageInfoItem(){NickName = "小王1" , Content = "珠宝加油1"},
+            new MessageInfoItem(){NickName = "小王2" , Content = "珠宝加油2"},
+            new MessageInfoItem(){NickName = "小王3" , Content = "珠宝加油3"},
         }
     };
 
@@ -224,47 +271,4 @@ public class Data
         BuyIntervalTime = 3,
         BuyToggle = false,
     };
-    #endregion
-
-    #region 填充结构
-    /// <summary>
-    /// 刷新个人登录信息
-    /// </summary>
-    /// <param name="port"></param>
-    public void RequestLoginInfo(int port)
-    {
-        // if (HeadInfos.ContainsKey(port)) return;
-        var headInfo = new LoginInfo();
-        headInfo.port = port;
-        headInfos.Add(headInfo);
-
-        //  登录状态
-        Protocol.Client2Server_LoginStatus(port, (success) =>
-        {
-            // 请求详细数据
-            Protocol.Client2Server_GetSelfLoginInfo(port, (success,nickname, head_big) =>
-            {
-                if (success)
-                {
-                    headInfo.Name = nickname;
-                    headInfo.IconUrl = head_big;
-                    MessageManager.Instance.SendMessage(Protocol.MSG_LoginInfo_Update);
-                }
-                else
-                {
-                    // TODO
-                }
-            });
-        });
-    }
-    
-    /// <summary>
-    /// 点赞
-    /// </summary>
-    /// <param name="port"></param>
-    public void RequestLike(int port)
-    {
-        Protocol.Client2Server_LikeFinderLive(port);
-    }
-    #endregion
 }

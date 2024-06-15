@@ -1,11 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.UI;
-using static Data;
 using static TMPro.TMP_Dropdown;
 
 public class UIManger : MonoBehaviour
@@ -55,13 +53,13 @@ public class UIManger : MonoBehaviour
             Transform root = loginFather.GetChild(i);
             Transform loginTrans = root.Find("Login");
             Transform loginedTrans = root.Find("Logined");
-            bool isLogined = i < _data.headInfos.Count;
+            bool isLogined = i < _data.loginInfos.Count;
             loginTrans.gameObject.SetActive(!isLogined);
             loginedTrans.gameObject.SetActive(isLogined);
             if (isLogined)
             {
-                StartCoroutine(DownloadImage(loginedTrans.Find("Icon").GetComponent<Image>(), _data.headInfos[i].IconUrl));
-                loginedTrans.Find("Name").GetComponent<TextMeshProUGUI>().text = _data.headInfos[i].Name;
+                StartCoroutine(DownloadImage(loginedTrans.Find("Icon").GetComponent<Image>(), _data.loginInfos[i].IconUrl));
+                loginedTrans.Find("Name").GetComponent<TextMeshProUGUI>().text = _data.loginInfos[i].NickName;
             }
         }
 
@@ -85,7 +83,8 @@ public class UIManger : MonoBehaviour
 
     private void ClickHeadRefreah()
     {
-        _data.RequestLoginInfo(30001);
+        var loginInfo = _data.loginInfos[0];
+        Protocol.Client2Server_LoginStatus(loginInfo.port, loginInfo);
     }
 
     private void ClickLoginSetting()
@@ -94,10 +93,10 @@ public class UIManger : MonoBehaviour
         ShowUserSayEditor(true);
     }
 
-    private void ClickLoginSendMessage(int loginIndex , string message)
+    private void ClickLoginSendMessage(int index , string message)
     {
-        // TODO
-        Debug.Log("ClickLoginSendMessage " + message);
+        Data.LoginInfo loginInfo = _data.loginInfos[index];
+        Protocol.Client2Server_FinderPostLiveMsg(loginInfo.port,loginInfo.UserName, message);
     }
 
     private void ShowUserSayEditor(bool isShow)
@@ -131,15 +130,18 @@ public class UIManger : MonoBehaviour
     {
         Transform roomFather = GameObject.Find("Canvas/RoomInfo").transform;
         StartCoroutine(DownloadImage(roomFather.Find("Icon").GetComponent<Image>(), _data.roomInfo.IconUrl));
-        roomFather.Find("OnlineMember").GetComponent<TextMeshProUGUI>().text = _data.roomInfo.OnlineMember.ToString();
+        roomFather.Find("OnlineCount").GetComponent<TextMeshProUGUI>().text = _data.roomInfo.OnlineCount.ToString();
         roomFather.Find("LikeCount").GetComponent<TextMeshProUGUI>().text = _data.roomInfo.LikeCount.ToString();
+        roomFather.Find("ParticipantCount").GetComponent<TextMeshProUGUI>().text = _data.roomInfo.ParticipantCount.ToString();
     }
 
     private void ClickRoomSearch(string message)
     {
         string nameInput = GameObject.Find("Canvas/RoomInfo/NameInput").GetComponent<TMP_InputField>().text;
-        // TODO
-        Debug.Log(nameInput);
+        Data.LiveMsgInfo.objectId = GameObject.Find("Canvas/RoomInfo/NameInput1").GetComponent<TMP_InputField>().text;
+        Data.LiveMsgInfo.objectNonceId = GameObject.Find("Canvas/RoomInfo/NameInput2").GetComponent<TMP_InputField>().text;
+
+        Protocol.Client2Server_FinderGetCommentDetail(_data.loginInfos[0].port, _data.roomInfo);  // TODO
     }
     #endregion
 
@@ -303,13 +305,16 @@ public class UIManger : MonoBehaviour
     }
     private void RefreshAutoLikeInfo()
     {
+        var random = new System.Random();
         Timer.Instance.RemoveTimer(_autoLikeTimer);
         if (_data.autoInfo.LikeToggle)
         {
             _autoLikeTimer = Timer.Instance.AddTimer(_data.autoInfo.LikeIntervalTime, (delta) =>
             {
-                // TODO 这里需要发送请求
-                Debug.Log("点赞");
+                // 随机通过成员去点赞
+                int index = random.Next(0, _data.loginInfos.Count);
+                int likeCount = random.Next(1, 10);// TODO 随机点赞
+                Protocol.Client2Server_LikeFinderLive(_data.loginInfos[index].port, likeCount);
                 return false;
             });
         }
@@ -480,6 +485,11 @@ public class UIManger : MonoBehaviour
         _screenTitleIndex = index;
         RefreshScreenInfo();
     }
+
+    private void MSG_Puppetattr_Update()
+    {
+        RefreshScreenInfo();
+    }
     #endregion
 
     #region 留言信息
@@ -493,7 +503,8 @@ public class UIManger : MonoBehaviour
             {
                 // TODO 这里需要发送请求
                 Debug.Log("留言");
-                RefreshMessageContentInfo();
+                var user = _data.loginInfos[0];
+                Protocol.Client2Server_FinderGetLiveMsg(user.port, _data.messageInfo);
                 return false;
             });
         }
@@ -511,6 +522,11 @@ public class UIManger : MonoBehaviour
         _data.messageInfo.AutoToggle = isSelect;
         RefreshMessageInfo();
     }
+
+    private void MSG_MessageInfo_Update(MessageManager.Message m)
+    {
+        RefreshMessageContentInfo();
+    }
     #endregion
 
     #region UI
@@ -518,6 +534,8 @@ public class UIManger : MonoBehaviour
     private void RegisterMessage()
     {
         MessageManager.Instance.RegisterMessage(Protocol.MSG_LoginInfo_Update,MSG_LoginInfo_Update);
+        MessageManager.Instance.RegisterMessage(Protocol.MSG_MessageInfo_Update,MSG_MessageInfo_Update);
+        MessageManager.Instance.RegisterMessage(Protocol.MSG_Puppetattr_Update,MSG_Puppetattr_Update);
 
         // Login
         Transform loginFather = GameObject.Find("Canvas/HeadInfo/Panel").transform;
