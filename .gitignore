@@ -76,3 +76,7 @@ Test/
 资料/
 WeChatLive/Client/Assets/6000FlatButtonIcon/
 WeChatLive/Client/obj/
+WeChatLive/Client/dist/
+WeChatLive/Client/__pycache__/
+WeChatLive/Client/build/
+WeChatLive/Client/Log/

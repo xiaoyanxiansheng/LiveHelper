@@ -1,0 +1,22 @@
+TYPE_wxLogin = "wxLogin"
+TYPE_wxLogout = "wxLogout"
+TYPE_speak = "speak"
+TYPE_continuousSpeak = "continuousSpeak"
+TYPE_purchase = "purchase"
+TYPE_autoLikes = "autoLikes"
+TYPE_searchRoom = "searchRoom"
+TYPE_operationCompleted = "operationCompleted"
+TYPE_Danmu = "getBarrage"
+
+TYPE_ERROR_SERVER = "TYPE_ERROR_SERVER"
+TYPE_ERROR_CLIENT = "TYPE_ERROR_CLIENT"
+
+TEXT_HELP = "互助发言.txt"
+TEXT_USER = "快捷发言方案.txt"
+TEXT_WELLCOME = "欢迎发言方案.txt"
+TEXT_SCREEN = "飘屏发言.txt"
+
+TYPE_HELP = "help"
+TYPE_USER = "user"
+TYPE_SCREEN = "screen"
+TYPE_WELLCOME = "wellcome"
