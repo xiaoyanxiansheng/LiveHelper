@@ -6,7 +6,7 @@ from Define import *
 
 class CardInfo():
     def __init__(self):
-        self.expiredDatetime = "2024年8月26日"
+        self.expiredDatetime = ""
 
 class LiveInfo():
     def __init__(self):
@@ -15,7 +15,7 @@ class LiveInfo():
         self.liveId = ""
 
         self.iconUrl = ""
-        self.name = ""
+        self.nickname = ""
         self.onLineMember = 0
         self.lookCount = 0
         self.likeCount = 0
@@ -104,6 +104,9 @@ class Data():
         self.wellComeData = WellComeData()
 
         self.ReadData()
+
+    def GetUserCount(self):
+        return len(self.userDataCollect.userData)
 
     def IsEnterLive(self):
         return self.liveInfo.objectId != "" and self.liveInfo.objectNonceId != "" and self.liveInfo.liveId != ""

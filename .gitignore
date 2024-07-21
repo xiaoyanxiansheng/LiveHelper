@@ -80,3 +80,5 @@ WeChatLive/Client/dist/
 WeChatLive/Client/__pycache__/
 WeChatLive/Client/build/
 WeChatLive/Client/Log/
+WeChatLive/Server/dist/
+WeChatLive/Server/build/

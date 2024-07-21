@@ -34,11 +34,14 @@ Window {
     signal clickScreenSelectIndex(int index)
     signal helpContentChange(int selectIndex , string content)
     signal helpTitleChange(int selectIndex , string content)
+    signal clickHelpAdd()
     signal screenContentChange(int selectIndex, string content)
     signal screenTitleChange(int selectIndex, string content)
+    signal clickScreenAdd()
     signal selectFile(string type , string filePath)
     signal clickSaveScreen()
     signal clickSaveHelp()
+    signal clickNotice()
 
     Component.onCompleted:
     {
@@ -103,20 +106,39 @@ Window {
     }
     function getWellComeTime()
     {
-        return wellcometime.text
+        return likeTime2.text
+    }
+    function setWellComeTime(time){
+        likeTime2.text = time
     }
 
     function getHelpTime(){
-        return helptime.text
+        return likeTime3.text
     }
+
+    function setHelpTime(time){
+        likeTime3.text = time
+    }
+
     function getScreenTime(){
-        return screenTime.text
+        return likeTime4.text
     }
+    function setScreenTime(time){
+        likeTime4.text = time
+    }
+
     function getLikeTime(){
         return likeTime.text
     }
+    function setLikeTime(time){
+        likeTime.text = time
+    }
+
     function getBuyTime(){
-        return buyTime.text
+        return likeTime1.text
+    }
+    function setBuyTime(time){
+        likeTime1.text = time
     }
 
     function setWellComeContentIndex(index) {
@@ -131,8 +153,9 @@ Window {
     function setHelpTitleText(titles){
         helpListModel.clear()
         for (let i = 0; i < titles.length; i++) {
-            helpListModel.append({ content: titles[i]});
+            helpListModel.append({ content: titles[i], isAdd: false});
         }
+        helpListModel.append({ content: "" , isAdd: true});
     }
 
     function setHelpContentText(content)
@@ -153,8 +176,9 @@ Window {
     function setScreenTitleText(titles){
         screenListModel.clear()
         for (let i = 0; i < titles.length; i++) {
-            screenListModel.append({ content: titles[i]});
+            screenListModel.append({ content: titles[i] , isAdd: false});
         }
+        screenListModel.append({ content: "" , isAdd: true});
     }
 
     function setScreenContentText(content)
@@ -193,7 +217,7 @@ Window {
 
     property bool canClick: true
 
-        // 定义一个计时器，用于重置canClick变量
+    // 定义一个计时器，用于重置canClick变量
     Timer {
         id: clickTimer
         interval: 1000  // 1秒
@@ -259,17 +283,17 @@ Window {
 
         Rectangle {
             id: customTitleBar
-            x: 62
-            width: 1426
             height: 64
             opacity: 1
             color: "#fafafa"
             radius: 5
             border.color: "gray"
             border.width: 0
-            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.leftMargin: 62
+            anchors.rightMargin: 0
             transformOrigin: Item.Center
-            anchors.topMargin: 0
 
             MouseArea {
                 id: titleBarMouseArea
@@ -337,69 +361,78 @@ Window {
                 fillMode: Image.PreserveAspectFit
             }
 
-            Text {
-                x: 13
-                y: 19
-                width: 35
-                height: 27
-                color: "#81859a"
-                text: "版本: "
-                anchors.left: parent.left
-                horizontalAlignment: Text.AlignLeft
-                verticalAlignment: Text.AlignVCenter
-                font.bold: false
-                anchors.leftMargin: 1196
-                font.family: "Noto Sans S Chinese Light"
-                font.pointSize: 8
+            Image {
+                id: image224
+                x: 1261
+                y: 16
+                width: 32
+                height: 32
+                source: "images/wenhao.png"
+                sourceSize.height: 32
+                sourceSize.width: 32
+                fillMode: Image.Stretch
+                MouseArea {
+                    anchors.fill: parent
+                    onReleased: image224.scale = 1
+                    onClicked: {
+                        clickNotice()
+                    }
+                    onPressed: image224.scale = 0.9
+                }
             }
 
             Text {
-                x: 4
-                y: 19
-                width: 41
-                height: 27
+                id: text11
+                x: 1165
+                y: 26
+                width: 33
+                height: 15
                 color: "#81859a"
-                text: "1.0.0"
-                anchors.left: parent.left
+                text: qsTr("版本: ")
+                font.pixelSize: 16
                 horizontalAlignment: Text.AlignLeft
                 verticalAlignment: Text.AlignVCenter
-                font.bold: false
-                anchors.leftMargin: 1237
-                font.family: "Noto Sans S Chinese Light"
-                font.pointSize: 6
+                font.family: "Noto Sans S Chinese Medium"
+
+                Text {
+                    id: text12
+                    x: 40
+                    y: 0
+                    width: 29
+                    height: 18
+                    color: "#8d91aa"
+                    text: qsTr("1.0.0")
+                    font.pixelSize: 12
+                    horizontalAlignment: Text.AlignLeft
+                    verticalAlignment: Text.AlignVCenter
+                    font.family: "Noto Sans S Chinese Medium"
+                }
             }
 
             Text {
-                x: -4
-                y: 19
-                width: 59
-                height: 27
+                x: 939
+                y: 26
+                width: 69
+                height: 15
                 color: "#e96a19"
-                text: "到期时间: "
-                anchors.left: parent.left
+                text: qsTr("到期时间: ")
+                font.pixelSize: 16
                 horizontalAlignment: Text.AlignLeft
                 verticalAlignment: Text.AlignVCenter
-                font.bold: false
-                anchors.leftMargin: 972
-                font.family: "Noto Sans S Chinese Light"
-                font.pointSize: 8
-            }
-
-            Text {
-                id: expiredDatetime
-                x: -12
-                y: 19
-                width: 112
-                height: 27
-                color: "#81859a"
-                text: "2024年8月25日"
-                anchors.left: parent.left
-                horizontalAlignment: Text.AlignLeft
-                verticalAlignment: Text.AlignVCenter
-                font.bold: false
-                anchors.leftMargin: 1047
-                font.family: "Noto Sans S Chinese Light"
-                font.pointSize: 6
+                Text {
+                    id: expiredDatetime
+                    x: 72
+                    y: 0
+                    width: 29
+                    height: 18
+                    color: "#8d91aa"
+                    text: qsTr("1.0.0")
+                    font.pixelSize: 12
+                    horizontalAlignment: Text.AlignLeft
+                    verticalAlignment: Text.AlignVCenter
+                    font.family: "Noto Sans S Chinese Medium"
+                }
+                font.family: "Noto Sans S Chinese Medium"
             }
 
 
@@ -1181,7 +1214,7 @@ Window {
                         x: 26
                         width: 69
                         color: "#81859a"
-                        text: "3"
+                        text: "5"
                         anchors.top: parent.top
                         anchors.bottom: parent.bottom
                         font.pixelSize: 14
@@ -1207,7 +1240,7 @@ Window {
                             onClicked: {
                                 likeTime2.text = likeTime2.text - 1
                                 if(likeTime2.text < 1) likeTime2.text = 1
-                                likeTimeRefresh()
+                                wellComeReplayTimeRefresh()
                             }
                         }
                         fillMode: Image.PreserveAspectFit
@@ -1229,7 +1262,7 @@ Window {
                             anchors.bottomMargin: 0
                             onClicked: {
                                 likeTime2.text = parseFloat(likeTime2.text) + 1
-                                likeTimeRefresh()
+                                wellComeReplayTimeRefresh()
                             }
                         }
                         fillMode: Image.PreserveAspectFit
@@ -1489,7 +1522,7 @@ Window {
                         x: 26
                         width: 69
                         color: "#7f7f7f"
-                        text: "3"
+                        text: "5"
                         anchors.top: parent.top
                         anchors.bottom: parent.bottom
                         font.pixelSize: 14
@@ -1655,7 +1688,7 @@ Window {
                         x: 26
                         width: 69
                         color: "#7f7f7f"
-                        text: "3"
+                        text: "5"
                         anchors.top: parent.top
                         anchors.bottom: parent.bottom
                         font.pixelSize: 14
@@ -1681,7 +1714,7 @@ Window {
                             onClicked: {
                                 likeTime1.text = likeTime1.text - 1
                                 if(likeTime1.text < 1) likeTime1.text = 1
-                                likeTimeRefresh()
+                                buyTimeRefresh()
                             }
                         }
                         fillMode: Image.PreserveAspectFit
@@ -1703,7 +1736,7 @@ Window {
                             anchors.bottomMargin: 0
                             onClicked: {
                                 likeTime1.text = parseFloat(likeTime1.text) + 1
-                                likeTimeRefresh()
+                                buyTimeRefresh()
                             }
                         }
                         fillMode: Image.PreserveAspectFit
@@ -1836,7 +1869,7 @@ Window {
                                             id: textInput
                                             anchors.verticalCenter: parent.verticalCenter
                                             visible: false
-                                            text: modelData
+                                            text: model.content
                                             color: "#363842"
                                             onAccepted: {
                                                 buttonText.text = text
@@ -1854,6 +1887,36 @@ Window {
                                                 buttonText.visible = true
                                                 helpTitleChange(helpSelectColumn.helpSelectIndex,text)
                                             }
+                                        }
+                                    }
+
+                                    Rectangle {
+                                        id: container11
+                                        x: 0
+                                        y: 0
+                                        width: 116
+                                        height: 30
+                                        visible: model.isAdd
+                                        color: "#fafafa"
+                                        MouseArea {
+                                            anchors.fill: parent
+                                            onClicked: {
+                                                clickHelpAdd()
+                                            }
+                                            onReleased: container11.scale = 1
+                                            onPressed: container11.scale = 0.9
+                                        }
+
+                                        Text {
+                                            id: text110
+                                            color: "#7a7d94"
+                                            text: qsTr("+")
+                                            anchors.fill: parent
+                                            font.pixelSize: 36
+                                            horizontalAlignment: Text.AlignHCenter
+                                            verticalAlignment: Text.AlignVCenter
+                                            font.bold: true
+                                            font.family: "Noto Sans S Chinese Medium"
                                         }
                                     }
                                 }
@@ -1976,7 +2039,7 @@ Window {
                         x: 26
                         width: 42
                         color: "#81859a"
-                        text: "3"
+                        text: "5"
                         anchors.top: parent.top
                         anchors.bottom: parent.bottom
                         font.pixelSize: 14
@@ -2002,7 +2065,7 @@ Window {
                             onClicked: {
                                 likeTime3.text = likeTime3.text - 1
                                 if(likeTime3.text < 1) likeTime3.text = 1
-                                likeTimeRefresh()
+                                helpTimeRefresh()
                             }
                         }
                         fillMode: Image.PreserveAspectFit
@@ -2024,7 +2087,7 @@ Window {
                             anchors.bottomMargin: 0
                             onClicked: {
                                 likeTime3.text = parseFloat(likeTime3.text) + 1
-                                likeTimeRefresh()
+                                helpTimeRefresh()
                             }
                         }
                         fillMode: Image.PreserveAspectFit
@@ -2290,6 +2353,7 @@ Window {
                                         id: container1
                                         width: 116
                                         height: 30
+                                        visible: !model.isAdd
                                         color: screenSelectColumn.screenSelectIndex == index ? "#eceaff" : "#fafafa"
                                         MouseArea {
                                             anchors.fill: parent
@@ -2337,7 +2401,7 @@ Window {
                                         TextInput {
                                             id: textInput1
                                             visible: false
-                                            text: modelData
+                                            text: model.content
                                             anchors.verticalCenter: parent.verticalCenter
                                             anchors.horizontalCenter: parent.horizontalCenter
                                             anchors.fill: parent
@@ -2359,6 +2423,36 @@ Window {
                                                 buttonText1.visible = true
                                                 screenTitleChange(screenSelectColumn.screenSelectIndex,text)
                                             }
+                                        }
+                                    }
+
+                                    Rectangle {
+                                        id: container2
+                                        x: 0
+                                        y: 0
+                                        width: 116
+                                        height: 30
+                                        visible: model.isAdd
+                                        color: "#fafafa"
+                                        MouseArea {
+                                            anchors.fill: parent
+                                            onClicked: {
+                                                clickScreenAdd()
+                                            }
+                                            onReleased: container2.scale = 1
+                                            onPressed: container2.scale = 0.9
+                                        }
+
+                                        Text {
+                                            id: text10
+                                            color: "#7a7d94"
+                                            text: qsTr("+")
+                                            anchors.fill: parent
+                                            font.pixelSize: 36
+                                            horizontalAlignment: Text.AlignHCenter
+                                            verticalAlignment: Text.AlignVCenter
+                                            font.bold: true
+                                            font.family: "Noto Sans S Chinese Medium"
                                         }
                                     }
                                 }
@@ -2479,7 +2573,7 @@ Window {
                         x: 26
                         width: 42
                         color: "#7a7d94"
-                        text: "3"
+                        text: "5"
                         anchors.top: parent.top
                         anchors.bottom: parent.bottom
                         font.pixelSize: 14
@@ -2507,7 +2601,7 @@ Window {
                             onClicked: {
                                 likeTime4.text = likeTime4.text - 1
                                 if(likeTime4.text < 1) likeTime4.text = 1
-                                likeTimeRefresh()
+                                screenTimeRefresh()
                             }
                         }
                     }
@@ -2529,7 +2623,7 @@ Window {
                             onReleased: parent.scale = 1
                             onClicked: {
                                 likeTime4.text = parseFloat(likeTime4.text) + 1
-                                likeTimeRefresh()
+                                screenTimeRefresh()
                             }
                         }
                     }

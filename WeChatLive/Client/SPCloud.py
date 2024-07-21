@@ -1,4 +1,5 @@
 import ctypes
+from datetime import datetime
 import os
 import sys
 
@@ -46,7 +47,7 @@ get_card_expired_time_stamp.restype = ctypes.c_int64
 
 def InitializeCloud(card):
     timeout = 30000  # 超时时间
-    ip = "121.40.96.47".encode('utf-8')  # IP地址
+    ip = "110.40.38.37".encode('utf-8')  # IP地址
     port = 8896  # 端口号
     error_code = ctypes.c_int()
     try:
@@ -70,19 +71,16 @@ def CloudOffline():
         print(f"Exception during cloud offline: {e}")
 
 def GetExpiredTimeStamp():
-    error_code = ctypes.c_int()
-    expired_datetime = 0
     try:
+        error_code = ctypes.c_int()
         expired_time_stamp = get_card_expired_time_stamp(ctypes.byref(error_code))
-        if expired_time_stamp != 0:
-            from datetime import datetime
-            expired_datetime = datetime.utcfromtimestamp(expired_time_stamp)
-            return expired_datetime.strftime('%Y年%m月%d日 %H:%M:%S')
-        else:
-            return 0
+        return expired_time_stamp
     except Exception as e:
         print(f"Exception during fetching expired timestamp: {e}")
         return 0
+
+def IsExpiredTimeStamp():
+    return datetime.now() > datetime.fromtimestamp(GetExpiredTimeStamp())
 
 if __name__ == "__main__":
     card = "ZK534435871A114F44B30D2F34450F53C1"

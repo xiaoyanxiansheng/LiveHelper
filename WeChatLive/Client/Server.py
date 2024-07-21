@@ -1,20 +1,24 @@
 # Server.py
 
 import json
+from tkinter import messagebox
+import requests
 import websocket
 import threading
 import time
 from Define import *
+from WXVersionCheck import check_and_install_wechat, install_wechat
 
 class Server:
-    def __init__(self, lic):
+    def __init__(self, quit_application, lic):
         self.useServer = True
         self.lic = lic
-        self.bindLiveNames = ["陆家角服饰","四川酒创-宝总"] # TODO 从服务器拿
+        self.quit_application = quit_application
+        self.bindLiveNames = []
         if self.useServer:
             websocket.enableTrace(True)
-            # url = "ws://110.40.38.21:8199/ws/" + lic
-            url = "ws://121.40.96.47:8199/ws/" + lic
+            url = "ws://110.40.38.21:8199/ws/" + lic
+            # url = "ws://121.40.96.47:8199/ws/" + lic
             print("Initializing WebSocket connection " + url)
             self.ws = websocket.WebSocketApp(
                 url,
@@ -28,7 +32,56 @@ class Server:
             self.wst.daemon = True
             self.wst.start()
 
-            print("链接服务器成功 " + url)
+            self.RequestBindLiveNames()
+
+    # 请求直播间列表 
+    def RequestBindLiveNames(self):
+        url = f"http://110.40.38.21:5001/check/get-link-list?passport={self.lic}"
+        try:
+            response = requests.get(url)
+            if response.status_code == 200:
+                try:
+                    data = response.json()
+                    if(data['code'] != 0):
+                        messagebox.showinfo("服务器返回错误", data['message'])
+                        print("服务器返回错误: "+ data['message'])
+                    self.bindLiveNames.clear()
+                    if data['data']['list'] != None:
+                        for value in data['data']['list']:
+                            self.bindLiveNames.append(value['live_room_name'])
+                except ValueError:
+                    print("Error: Response is not in JSON format")
+            else:
+                print(f"Request failed with status code {response.status_code}")
+        except requests.RequestException as e:
+            print(f"Request failed: {e}")
+
+    # 绑定+进入
+    def RequestBindEnterLive(self , liveName):
+        url = f"http://110.40.38.21:5001/check/check-link-num?passport={self.lic}&live_id={liveName}&live_room_name={liveName}"
+        try:
+            response = requests.get(url)
+            if response.status_code == 200:
+                try:
+                    data = response.json()
+                    if(data['code'] != 0):
+                        messagebox.showinfo("服务器返回错误", data['message'])
+                        print("服务器返回错误: "+ data['message'])
+
+                    # 刷新绑定列表
+                    if data['data']['access']:
+                        self.RequestBindLiveNames()
+
+                    return data['data']['access']
+                except ValueError:
+                    print("Error: Response is not in JSON format")
+                    return False
+            else:
+                print(f"Request failed with status code {response.status_code}")
+                return False
+        except requests.RequestException as e:
+            print(f"Request failed: {e}")
+            return False
 
     def run_forever(self):
         try:
@@ -126,6 +179,16 @@ class Server:
         except Exception as e:
             print(f"Error in WXSearchRoom: {e}")
 
+    def WXEnterRoom(self, wxId , content):
+        try:
+            liveData = self.clientData.liveInfo.GetBaseLiveInfo()
+            liveData["content"] = content
+            liveData = json.dumps(liveData).replace('"', '\\"')
+            data = f'{{"type":"{TYPE_enterRoom}","message":"{liveData}","wx_id":"{self.WXID(wxId)}"}}'
+            self.SendDataServerOrClient(data)
+        except Exception as e:
+            print(f"Error in WXEnterRoom: {e}")
+
     def OperationCompleted(self, wxId):
         try:
             data = f'{{"type":"{TYPE_operationCompleted}","message":"","wx_id":"{self.WXID(wxId)}"}}'
@@ -136,10 +199,18 @@ class Server:
     def GetBindLiveNames(self):
         return self.bindLiveNames
 
-    def BindBindLiveName(self, liveName):
-        self.bindLiveNames.append(liveName) # TODO 需要走服务器流程
-
     def SendDataServerOrClient(self, data):
+
+        if check_and_install_wechat():
+            result = messagebox.askyesno("微信版本错误！！！", "是否安装对应版本？")
+            if result:
+                install_wechat()
+                self.quit_application()
+            else:
+                pass
+                # self.quit_application()  
+            return
+
         try:
             print("[Server] Send " + data)
             if self.useServer:
@@ -157,6 +228,7 @@ class Server:
             type = data["type"]
 
             if type == "error":
+                messagebox.showinfo("服务器提示", message)
                 return
 
             if type == TYPE_operationCompleted:
@@ -176,7 +248,7 @@ class Server:
             if user is None:
                 return
 
-            user.instruction = type
+            user.instruction = type     # TODO 这里可能有问题 User不可能只做一件事
 
             if type in [TYPE_speak, TYPE_continuousSpeak]:
                 user.instructionContent = content["content"]
@@ -186,7 +258,8 @@ class Server:
             elif type == TYPE_autoLikes:
                 self.wxHelper.JoinLive(client, content["objectId"], content["objectNonceId"], content["liveId"])
             elif type == TYPE_searchRoom:
-                self.wxHelper.instruction = TYPE_searchRoom
+                self.wxHelper.LiveSearch(client, content["content"])
+            elif type == TYPE_enterRoom:
                 self.wxHelper.LiveSearch(client, content["content"])
             elif type == TYPE_Danmu:
                 self.wxHelper.GetDanmu(client)

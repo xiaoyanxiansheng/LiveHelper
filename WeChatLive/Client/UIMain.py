@@ -1,6 +1,7 @@
+from datetime import datetime
 import random
 from tkinter import Tk, messagebox
-from SPCloud import GetExpiredTimeStamp
+from SPCloud import GetExpiredTimeStamp, IsExpiredTimeStamp
 from Server import *
 from WXHelpDLL import*
 from PyQt5.QtCore import pyqtSignal, QObject
@@ -18,6 +19,8 @@ class UIMain():
         self.server = server
         self.wxhelper = wxhelper
 
+        self.notice = None
+
         self.Data.cardInfo.expiredDatetime = GetExpiredTimeStamp()
 
         self.wellComeContenIndex = 0
@@ -25,29 +28,29 @@ class UIMain():
         self.wellComeToggle = False
         self.wellComeReplyToggle = False
         self.wellComeTime = 0
-        self.wellComeTimeInverval = 2
+        self.wellComeTimeInverval = 5
 
         self.changeNickNameTime = 0
 
         self.screenTime = 0
-        self.screenTimeInverval = 2
+        self.screenTimeInverval = 5
         self.scrrenToggle = False
 
         self.likeToggle = False
         self.likeToggleTime = 0
-        self.likeToggleTimeInverval = 2
+        self.likeToggleTimeInverval = 5
 
         self.buyToggle = False
         self.buyTime = 0
-        self.buyTimeInverval = 2
+        self.buyTimeInverval = 5
 
         self.helpToggle = False
         self.helpTime = 0
-        self.helpTimeInverval = 2
+        self.helpTimeInverval = 5
 
         self.danmuToggle = False
         self.danmuTime = 0
-        self.danmuTimeInverval = 2
+        self.danmuTimeInverval = 5
 
         self.uiRoot = uiRoot
         self.uiRoot.signalTest.connect(self.signalTest)
@@ -76,8 +79,12 @@ class UIMain():
         self.uiRoot.clickEnterLiveByName.connect(self.ClickEnterLiveByName)
         self.uiRoot.clickSaveHelp.connect(self.ClickSaveHelp)
         self.uiRoot.clickSaveScreen.connect(self.ClickSaveScreen)
+        self.uiRoot.clickNotice.connect(self.ClickNotice)
+        self.uiRoot.clickScreenAdd.connect(self.ClickScreenAdd)
+        self.uiRoot.clickHelpAdd.connect(self.ClickHelpAdd)
 
         self.startTimer()
+        self.startTimer5()
 
         self.wxhelper.WXHelpDLL_CallRecvHandler(self.CallRecvHandlerCall)
 
@@ -87,6 +94,7 @@ class UIMain():
         self.RefreshTopInfo()
         self.RefreshUserLogin()
         self.RefreshLive()
+        self.RefreshSearchLiveComboBox()
         self.RefreshWellCome()
         self.RefreshScreen()
         self.RefreshLikeBuy()
@@ -96,8 +104,15 @@ class UIMain():
     def startTimer(self):
         self.timer = threading.Timer(1.0, self.Update)
         self.timer.start()
+    
+    def startTimer5(self):
+        self.timer5 = threading.Timer(0.1, self.Update5)
+        self.timer5.start()
 
     def SelectFile(self, type, filePath):
+        if self.IsExpiredTimeStamp():
+            return
+            
         try:
             self.Data.ReadDataByType(type, filePath)
             self.RefreshHelp()
@@ -119,6 +134,8 @@ class UIMain():
                 self.RefreshUserLogin()
                 return
             
+            user = self.Data.GetUserById(clientId)
+
             type = self.wxhelper.WXParseInstruction(self.Data, clientId, msgData)
             if type == TYPE_wxLogin:
                 self.RefreshUserLogin()
@@ -135,55 +152,91 @@ class UIMain():
             elif type == TYPE_speak:
                 pass
             elif type == TYPE_searchRoom:
+                liveName = user.instructionContent
+                if liveName == "":
+                    messagebox.showinfo("搜索失败", "直播间不存在或者未开播！！！")
+                else:
+                    result = messagebox.askyesno("进入直播间", "绑定并且进入直播间【{0}】？".format(liveName))
+                    if result:
+                        access = self.server.RequestBindEnterLive(liveName)
+                        if not access:
+                            messagebox.showinfo("绑定失败", "具体原因询问提供商!!!")
+                        else:
+                            self.RefreshSearchLiveComboBox()
+                            self.server.WXEnterRoom(user.client, liveName)
+                    else:
+                        pass
+            elif type == TYPE_enterRoom:
                 self.RefreshLive()
+                
         except Exception as e:
             print(f"Error in handle_result: {e}")
 
     def signalTest(self):
         pass
 
+    def IsExpiredTimeStamp(self):
+        if IsExpiredTimeStamp():
+            messagebox.showinfo("卡密过期", "卡密已过期，请找提供商！！！")
+            return True
+        return False
+
     def ClickOpenWeChat(self):
+        if self.IsExpiredTimeStamp():
+            return
+
         try:
             self.wxhelper.openWechatMutexTwo()
         except Exception as e:
             print(f"Error opening WeChat: {e}")
 
     def ClickSearchLiveByName(self, liveName):
-        liveName = liveName.strip()
-        if (not liveName in self.server.bindLiveNames) and liveName != "" :
-            # TODO 需要增加服务器接口 搜索到直播间后绑定
-            self.BindLiveName(liveName)
-
-    def BindLiveName(self , liveName):
-        result = messagebox.askyesno("直播间绑定", "搜到到直播间【{0}】，是否绑定？".format(liveName))
-        if result:
-            self.server.BindBindLiveName(liveName)
-            self.RefreshSearchLiveComboBox()
-        else:
-            pass
-
-    def ClickEnterLiveByName(self, liveName):
+        if self.IsExpiredTimeStamp():
+            return
+        
         try:
             userData = self.Data.GetRandomUser()
             if userData:
                 self.server.WXSearchRoom(userData.client, liveName)
+            else:
+                messagebox.showinfo("提示", "请先登录微信！！！")
+        except Exception as e:
+            print(f"Error searching live by name: {e}")
+
+    def ClickEnterLiveByName(self, liveName):
+        if self.IsExpiredTimeStamp():
+            return
+        
+        try:
+            userData = self.Data.GetRandomUser()
+            if userData:
+                self.server.WXEnterRoom(userData.client, liveName)
+            else:
+                messagebox.showinfo("提示", "请先登录微信！！！")
         except Exception as e:
             print(f"Error searching live by name: {e}")
 
     def ClickSendUserMsg(self, index, content):
+        if self.IsExpiredTimeStamp():
+            return
+        
         try:
             userData = self.Data.GetUsers()[index]
             if userData:
                 self.server.WXSpeak(userData.client, content)
+            else:
+                messagebox.showinfo("提示", "请先登录微信！！！")
         except Exception as e:
             print(f"Error sending user message: {e}")
 
     def Update(self):
+        if IsExpiredTimeStamp():
+            return
+        
         try:
             #if(self.Data.IsEnterLive()):
             self.UpdateToggleLike()
             self.UpdateWellComne()
-            self.UpdateScreen()
             self.UpdateBuy()
             self.UpdateDanmu()
             self.UpdateHelp()
@@ -191,26 +244,46 @@ class UIMain():
         except Exception as e:
             print(f"Error in update: {e}")
 
+    def Update5(self):
+        if IsExpiredTimeStamp():
+            return
+        
+        try:
+            self.UpdateScreen(0.1)
+            self.startTimer5()
+        except Exception as e:
+            print(f"Error in update: {e}")
+
     def RefreshWellCome(self):
         try:
             self.uiRoot.setWellComeModel(self.Data.wellComeData.contents)
             self.uiRoot.setWellComeModelIndex(0)
+            self.uiRoot.setWellComeTime(self.wellComeTimeInverval)
         except Exception as e:
             print(f"Error refreshing welcome content: {e}")
 
     def WellComeReplayTimeRefresh(self):
         try:
-            self.wellComeTimeInverval = int(self.uiRoot.getWellComeTime())
+            time = int(self.uiRoot.getWellComeTime())
+            time = self.TimeIntervalTips(time)
+            self.uiRoot.setWellComeTime(time)
+            self.wellComeTimeInverval = time
         except Exception as e:
             print(f"Error refreshing welcome reply time: {e}")
 
     def WellComeReplayToggle(self, chekced):
+        if self.IsExpiredTimeStamp():
+            return
+        
         try:
             self.wellComeReplyToggle = chekced
         except Exception as e:
             print(f"Error toggling welcome reply: {e}")
 
     def WellComeToggle(self, checked):
+        if self.IsExpiredTimeStamp():
+            return
+        
         try:
             self.wellComeToggle = checked
         except Exception as e:
@@ -234,6 +307,9 @@ class UIMain():
             print(f"Error updating welcome: {e}")
 
     def ScreenToggle(self, checked):
+        if self.IsExpiredTimeStamp():
+            return
+        
         try:
             self.scrrenToggle = checked
         except Exception as e:
@@ -241,27 +317,33 @@ class UIMain():
 
     def ScreenTimeRefresh(self):
         try:
-            self.screenTimeInverval = int(self.uiRoot.getScreenTime())
+            time = int(self.uiRoot.getScreenTime())
+            time = self.TimeIntervalTips(time)
+            self.uiRoot.setScreenTime(time)
+            self.screenTimeInverval = time
         except Exception as e:
             print(f"Error refreshing screen time: {e}")
 
-    def UpdateScreen(self):
+    def UpdateScreen(self , delta):
         try:
             if not self.scrrenToggle:
                 return
             
-            if self.screenTime < self.screenTimeInverval:
-                self.screenTime += 1
+            self.screenTime += delta
+            if self.screenTime < (self.screenTimeInverval / 10.0):
                 return
             
             self.screenTime = 0
             screenData = self.Data.screenData
             contents = screenData.contents[screenData.selectIndex][1]
-            self.server.WXContinuousSpeak(contents[0])
+            self.server.WXContinuousSpeak(random.choice(contents))
         except Exception as e:
             print(f"Error updating screen: {e}")
 
     def ClickScreenSelectIndex(self, index):
+        if self.IsExpiredTimeStamp():
+            return
+        
         try:
             self.Data.screenData.selectIndex = index
             self.RefreshScreen()
@@ -277,6 +359,7 @@ class UIMain():
             self.uiRoot.setScreenTitleText(titles)
             content = "\n".join(contents[1])
             self.uiRoot.setScreenContentText(content)
+            self.uiRoot.setScreenTime(self.screenTimeInverval)
         except Exception as e:
             print(f"Error refreshing screen content: {e}")
 
@@ -293,15 +376,28 @@ class UIMain():
             print(f"Error changing screen title: {e}")
     
     def ClickSaveScreen(self):
+        if self.IsExpiredTimeStamp():
+            return
+        
         self.Data.SaveDataByType(TYPE_SCREEN)
+
+    def ClickScreenAdd(self):
+        self.Data.screenData.contents.append(["新方案",""])
+        self.RefreshScreen()
 
     def LikeTimeRefresh(self):
         try:
-            self.likeToggleTimeInverval = int(self.uiRoot.getLikeTime())
+            time = int(self.uiRoot.getLikeTime())
+            time = self.TimeIntervalTips(time)
+            self.uiRoot.setLikeTime(time)
+            self.likeToggleTimeInverval = time
         except Exception as e:
             print(f"Error refreshing like time: {e}")
 
     def LikeToggle(self, checked):
+        if self.IsExpiredTimeStamp():
+            return
+        
         try:
             self.likeToggle = checked
         except Exception as e:
@@ -324,11 +420,17 @@ class UIMain():
 
     def BuyTimeRefresh(self):
         try:
-            self.buyTimeInverval = int(self.uiRoot.getBuyTime())
+            time = int(self.uiRoot.getBuyTime())
+            time = self.TimeIntervalTips(time)
+            self.uiRoot.setBuyTime(time)
+            self.buyTimeInverval = time
         except Exception as e:
             print(f"Error refreshing buy time: {e}")
 
     def BuyToggle(self, checked):
+        if self.IsExpiredTimeStamp():
+            return
+        
         try:
             self.buyToggle = checked
         except Exception as e:
@@ -349,6 +451,9 @@ class UIMain():
             print(f"Error updating buy: {e}")
 
     def HelpToggle(self, checked):
+        if self.IsExpiredTimeStamp():
+            return
+        
         try:
             self.helpToggle = checked
         except Exception as e:
@@ -356,7 +461,10 @@ class UIMain():
 
     def HelpTimeRefresh(self):
         try:
-            self.helpTimeInverval = int(self.uiRoot.getHelpTime())
+            time = int(self.uiRoot.getHelpTime())
+            time = self.TimeIntervalTips(time)
+            self.uiRoot.setHelpTime(time)
+            self.helpTimeInverval = time
         except Exception as e:
             print(f"Error refreshing help time: {e}")
 
@@ -378,6 +486,9 @@ class UIMain():
             print(f"Error updating help: {e}")
 
     def ClickHelpSelectIndex(self, index):
+        if self.IsExpiredTimeStamp():
+            return
+        
         try:
             self.Data.helpData.selectIndex = index
             self.RefreshHelp()
@@ -393,6 +504,7 @@ class UIMain():
             self.uiRoot.setHelpTitleText(titles)
             content = "\n".join(contents[1])
             self.uiRoot.setHelpContentText(content)
+            self.uiRoot.setHelpTime(self.helpTimeInverval)
         except Exception as e:
             print(f"Error refreshing help content: {e}")
 
@@ -409,9 +521,19 @@ class UIMain():
             print(f"Error changing help title: {e}")
     
     def ClickSaveHelp(self):
+        if self.IsExpiredTimeStamp():
+            return
+        
         self.Data.SaveDataByType(TYPE_HELP)
 
+    def ClickHelpAdd(self):
+        self.Data.helpData.contents.append(["新方案",""])
+        self.RefreshHelp()
+
     def DanmuToggle(self, checked):
+        if self.IsExpiredTimeStamp():
+            return
+        
         try:
             self.danmuToggle = checked
         except Exception as e:
@@ -435,8 +557,7 @@ class UIMain():
     def RefreshLive(self):
         try:
             live = self.Data.liveInfo
-            self.uiRoot.setLiveInfo(live.name, live.iconUrl, live.onLineMember, live.lookCount, live.likeCount)
-            self.RefreshSearchLiveComboBox()
+            self.uiRoot.setLiveInfo(live.nickname, live.iconUrl, live.onLineMember, live.lookCount, live.likeCount)
         except Exception as e:
             print(f"Error refreshing live info: {e}")
 
@@ -445,7 +566,8 @@ class UIMain():
 
     def RefreshTopInfo(self):
         try:
-            self.uiRoot.setExpiredDatetime(self.Data.cardInfo.expiredDatetime)
+            expired_datetime = datetime.utcfromtimestamp(self.Data.cardInfo.expiredDatetime)
+            self.uiRoot.setExpiredDatetime(expired_datetime.strftime('%Y年%m月%d日 %H:%M:%S'))
         except Exception as e:
             print(f"Error refreshing top info: {e}")
 
@@ -463,10 +585,36 @@ class UIMain():
             print(f"Error refreshing user login: {e}")
 
     def RefreshLikeBuy(self):
-        pass
+        self.uiRoot.setLikeTime(self.likeToggleTimeInverval)
+        self.uiRoot.setBuyTime(self.buyTimeInverval)
 
     def RefreshDanmu(self):
         try:
             self.uiRoot.setDanmu(self.Data.DanmuInfo.danmu)
         except Exception as e:
             print(f"Error refreshing danmu: {e}")
+    
+    def ClickNotice(self):
+        try:
+            if self.notice == None:
+                current_dir = os.path.dirname(os.path.abspath(__file__))
+                file_path = os.path.join(current_dir, 'NOTICE.txt')
+                with open(file_path, 'r', encoding='utf-8') as file:
+                    lines = file.readlines()
+                    self.notice = ''.join(lines)
+                    
+            messagebox.showinfo("重要告知!!!", self.notice)
+
+        except Exception as e:
+            print(f"Error reading file {file_path}: {e}")
+
+    def TimeIntervalTips(self, time):
+        if time < self.GetTimeInvervalMin():
+            messagebox.showinfo("重要告知!!!", "登录微信数量不够！！！")
+            time = self.GetTimeInvervalMin()
+        
+        return time
+
+    def GetTimeInvervalMin(self):
+        return GetTimeInterval(self.Data.GetUserCount())
+        

@@ -2,6 +2,7 @@ from ctypes import *
 import ctypes
 import os
 import json
+import sys
 from tkinter import messagebox
 from tornado.options import define
 from Define import *
@@ -152,26 +153,37 @@ class WXHelper():
                 user.instruction = TYPE_wxLogin
 
             if user is None:
+                self.server.OperationCompleted(clientId)
                 return
+
+            rinstruction = user.instruction
 
             if user.instruction == TYPE_speak:
                 if "liveCookies" in data:
                     self.UserMsg(user.client, user.instructionContent)
+                    self.server.OperationCompleted(clientId)
+                else:
                     self.server.OperationCompleted(clientId)
 
             if user.instruction == TYPE_continuousSpeak:
                 if "liveCookies" in data:
                     self.UserMsg(user.client, user.instructionContent)
                     self.server.OperationCompleted(clientId)
+                else:
+                    self.server.OperationCompleted(clientId)
 
             if user.instruction == TYPE_purchase:
                 if "liveCookies" in data:
                     self.Buy(user.client)
                     self.server.OperationCompleted(clientId)
+                else:
+                    self.server.OperationCompleted(clientId)
 
             if user.instruction == TYPE_autoLikes:
                 if "liveCookies" in data:
                     self.Like(user.client, 5)
+                    self.server.OperationCompleted(clientId)
+                else:
                     self.server.OperationCompleted(clientId)
 
             if user.instruction == TYPE_Danmu:
@@ -185,19 +197,36 @@ class WXHelper():
 
             if user.instruction == TYPE_searchRoom:
                 if ("infoList" in data) and (len(data["infoList"]) > 0):
+                    rinstruction = ""
+                    lastBuff = data["lastBuff"]
+                    userName = data["infoList"][0]["contact"]["username"]
+                    self.LiveSearch2(clientId, userName, "")
+                elif ("object" in data) and (len(data['object']) > 0) and ("liveInfo" in data['object'][0]):
+                    if "liveId" in data['object'][0]['liveInfo']:
+                        user.instructionContent = data['object'][0]['nickname']
+                        self.server.OperationCompleted(clientId)
+                    else:
+                        user.instructionContent = ""
+                        self.server.OperationCompleted(clientId)
+                else:
+                    self.server.OperationCompleted(clientId)
+
+            if user.instruction == TYPE_enterRoom:
+                if ("infoList" in data) and (len(data["infoList"]) > 0):
                     lastBuff = data["lastBuff"]
                     userName = data["infoList"][0]["contact"]["username"]
                     self.LiveSearch2(clientId, userName, "")
                 elif ("object" in data) and (len(data['object']) > 0) and ("liveInfo" in data['object'][0]):
                     dataCollect.liveInfo.objectId = data["object"][0]["id"]
                     dataCollect.liveInfo.objectNonceId = data["object"][0]["objectNonceId"]
+                    dataCollect.liveInfo.nickname = data["object"][0]["nickname"]
                     if "liveId" in data['object'][0]['liveInfo']:
                         dataCollect.liveInfo.liveId = data['object'][0]['liveInfo']['liveId']
                         dataCollect.liveInfo.iconUrl = data['contact']["headUrl"]
                         self.JoinLive(clientId, dataCollect.liveInfo.objectId, dataCollect.liveInfo.objectNonceId, dataCollect.liveInfo.liveId)
                     else:
                         self.server.OperationCompleted(clientId)
-                        messagebox.showinfo("搜索失败", "直播间不存在或者未开播")
+                        messagebox.showinfo("提示", "直播间未开播！！！")
                 elif "liveCookies" in data:
                     dataCollect.liveInfo.likeCount = data["liveInfo"]["likeCnt"]
                     dataCollect.liveInfo.lookCount = data["liveInfo"]["participantCount"]
@@ -205,8 +234,10 @@ class WXHelper():
                 elif "onlineMemberCount" in data:
                     dataCollect.liveInfo.onLineMember = data["onlineMemberCount"]
                     self.server.OperationCompleted(clientId)
+                else:
+                    self.server.OperationCompleted(clientId)
 
-            return user.instruction
+            return rinstruction
         except Exception as e:
             self.server.OperationCompleted(clientId)
             print(f"Error parsing instruction: {e}")

@@ -1,3 +1,4 @@
+import ctypes
 import signal
 import sys
 import Logout
@@ -67,8 +68,12 @@ def main():
     app.setQuitOnLastWindowClosed(False)
 
     # 设置应用程序的图标
-    icon_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "icon.png")
+    icon_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "icon.ico")
     app.setWindowIcon(QIcon(icon_path))
+
+    # 设置应用程序 User Model ID
+    myappid = 'com.examplecorp.livehelper.wechatlive.1.0'  # 替换为你的应用程序 ID
+    ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
 
     # 初始化系统托盘图标
     tray_icon = QSystemTrayIcon(QIcon(icon_path), parent=app)
@@ -89,6 +94,7 @@ def main():
     quit_action.triggered.connect(quit_application)
     
     tray_icon.setContextMenu(tray_menu)
+    tray_icon.setIcon(QIcon(icon_path))  # 确保托盘图标设置正确
     tray_icon.show()
 
     engine = QQmlApplicationEngine()
@@ -144,7 +150,7 @@ def main():
         data = Data()
 
         # 初始化服务器
-        server = Server(lic)
+        server = Server(quit_application,lic)
 
         # 初始化WXHelp
         wxHelper = WXHelper()
