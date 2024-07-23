@@ -7,6 +7,7 @@ import websocket
 import threading
 import time
 from Define import *
+from SPCloud import IsExpiredTimeStamp
 from WXVersionCheck import check_and_install_wechat, install_wechat
 
 class Server:
@@ -200,7 +201,7 @@ class Server:
         return self.bindLiveNames
 
     def SendDataServerOrClient(self, data):
-
+        
         if check_and_install_wechat():
             result = messagebox.askyesno("微信版本错误！！！", "是否安装对应版本？")
             if result:
@@ -210,7 +211,11 @@ class Server:
                 pass
                 # self.quit_application()  
             return
-
+        
+        if IsExpiredTimeStamp():
+            messagebox.showinfo("重要告知!!!", "卡密已过期，请找供应商拿卡！！！")
+            return
+        
         try:
             print("[Server] Send " + data)
             if self.useServer:
@@ -221,6 +226,20 @@ class Server:
             print(f"Error sending data: {e}")
 
     def ReceivedMessage(self, message):
+        if check_and_install_wechat():
+            result = messagebox.askyesno("微信版本错误！！！", "是否安装对应版本？")
+            if result:
+                install_wechat()
+                self.quit_application()
+            else:
+                pass
+                # self.quit_application()  
+            return
+        
+        if IsExpiredTimeStamp():
+            messagebox.showinfo("重要告知!!!", "卡密已过期，请找供应商拿卡！！！")
+            return
+        
         try:
             print("[Server] Received " + message)
 

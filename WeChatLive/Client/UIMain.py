@@ -1,7 +1,7 @@
 from datetime import datetime
 import random
 from tkinter import Tk, messagebox
-from SPCloud import GetExpiredTimeStamp, IsExpiredTimeStamp
+from SPCloud import GetExpiredTimeStamp
 from Server import *
 from WXHelpDLL import*
 from PyQt5.QtCore import pyqtSignal, QObject
@@ -82,9 +82,15 @@ class UIMain():
         self.uiRoot.clickNotice.connect(self.ClickNotice)
         self.uiRoot.clickScreenAdd.connect(self.ClickScreenAdd)
         self.uiRoot.clickHelpAdd.connect(self.ClickHelpAdd)
+        self.uiRoot.clickSendWellCome.connect(self.ClickSendWellCome)
+        self.uiRoot.clickSendHelp.connect(self.ClickSendHelp)
+        self.uiRoot.clickSendScreen.connect(self.ClickSendScreen)
+        self.uiRoot.clickSendDanmu.connect(self.ClickSendDanmu)
+        self.uiRoot.clickSendLike.connect(self.ClickSendLike)
+        self.uiRoot.clickSendBuy.connect(self.ClickSendBuy)
 
-        self.startTimer()
-        self.startTimer5()
+        # self.startTimer()
+        # self.startTimer5()
 
         self.wxhelper.WXHelpDLL_CallRecvHandler(self.CallRecvHandlerCall)
 
@@ -110,9 +116,6 @@ class UIMain():
         self.timer5.start()
 
     def SelectFile(self, type, filePath):
-        if self.IsExpiredTimeStamp():
-            return
-            
         try:
             self.Data.ReadDataByType(type, filePath)
             self.RefreshHelp()
@@ -175,25 +178,13 @@ class UIMain():
     def signalTest(self):
         pass
 
-    def IsExpiredTimeStamp(self):
-        if IsExpiredTimeStamp():
-            messagebox.showinfo("卡密过期", "卡密已过期，请找提供商！！！")
-            return True
-        return False
-
     def ClickOpenWeChat(self):
-        if self.IsExpiredTimeStamp():
-            return
-
         try:
             self.wxhelper.openWechatMutexTwo()
         except Exception as e:
             print(f"Error opening WeChat: {e}")
 
     def ClickSearchLiveByName(self, liveName):
-        if self.IsExpiredTimeStamp():
-            return
-        
         try:
             userData = self.Data.GetRandomUser()
             if userData:
@@ -204,9 +195,6 @@ class UIMain():
             print(f"Error searching live by name: {e}")
 
     def ClickEnterLiveByName(self, liveName):
-        if self.IsExpiredTimeStamp():
-            return
-        
         try:
             userData = self.Data.GetRandomUser()
             if userData:
@@ -217,9 +205,6 @@ class UIMain():
             print(f"Error searching live by name: {e}")
 
     def ClickSendUserMsg(self, index, content):
-        if self.IsExpiredTimeStamp():
-            return
-        
         try:
             userData = self.Data.GetUsers()[index]
             if userData:
@@ -230,9 +215,6 @@ class UIMain():
             print(f"Error sending user message: {e}")
 
     def Update(self):
-        if IsExpiredTimeStamp():
-            return
-        
         try:
             #if(self.Data.IsEnterLive()):
             self.UpdateToggleLike()
@@ -245,9 +227,6 @@ class UIMain():
             print(f"Error in update: {e}")
 
     def Update5(self):
-        if IsExpiredTimeStamp():
-            return
-        
         try:
             self.UpdateScreen(0.1)
             self.startTimer5()
@@ -272,22 +251,25 @@ class UIMain():
             print(f"Error refreshing welcome reply time: {e}")
 
     def WellComeReplayToggle(self, chekced):
-        if self.IsExpiredTimeStamp():
-            return
-        
         try:
             self.wellComeReplyToggle = chekced
         except Exception as e:
             print(f"Error toggling welcome reply: {e}")
 
     def WellComeToggle(self, checked):
-        if self.IsExpiredTimeStamp():
-            return
-        
         try:
             self.wellComeToggle = checked
         except Exception as e:
             print(f"Error toggling welcome: {e}")
+
+    def ClickSendWellCome(self):
+        userData = self.Data.GetRandomUser()
+        if userData is None or not self.wellComeReplyToggle:
+            return
+        
+        self.wellComeContenIndex = (self.wellComeContenIndex + 1) % len(self.wellComeConten)
+        self.uiRoot.setWellComeContentIndex(self.wellComeContenIndex)
+        self.server.WXSpeak(userData.client, self.uiRoot.getWellComeContent())
 
     def UpdateWellComne(self):
         try:
@@ -307,9 +289,6 @@ class UIMain():
             print(f"Error updating welcome: {e}")
 
     def ScreenToggle(self, checked):
-        if self.IsExpiredTimeStamp():
-            return
-        
         try:
             self.scrrenToggle = checked
         except Exception as e:
@@ -323,6 +302,11 @@ class UIMain():
             self.screenTimeInverval = time
         except Exception as e:
             print(f"Error refreshing screen time: {e}")
+
+    def ClickSendScreen(self):
+        screenData = self.Data.screenData
+        contents = screenData.contents[screenData.selectIndex][1]
+        self.server.WXContinuousSpeak(random.choice(contents))
 
     def UpdateScreen(self , delta):
         try:
@@ -341,9 +325,6 @@ class UIMain():
             print(f"Error updating screen: {e}")
 
     def ClickScreenSelectIndex(self, index):
-        if self.IsExpiredTimeStamp():
-            return
-        
         try:
             self.Data.screenData.selectIndex = index
             self.RefreshScreen()
@@ -376,9 +357,6 @@ class UIMain():
             print(f"Error changing screen title: {e}")
     
     def ClickSaveScreen(self):
-        if self.IsExpiredTimeStamp():
-            return
-        
         self.Data.SaveDataByType(TYPE_SCREEN)
 
     def ClickScreenAdd(self):
@@ -395,13 +373,14 @@ class UIMain():
             print(f"Error refreshing like time: {e}")
 
     def LikeToggle(self, checked):
-        if self.IsExpiredTimeStamp():
-            return
-        
         try:
             self.likeToggle = checked
         except Exception as e:
             print(f"Error toggling like: {e}")
+
+    def ClickSendLike(self):
+        userData = self.Data.GetRandomUser()
+        self.server.WXAutoLikes(userData.client)
 
     def UpdateToggleLike(self):
         try:
@@ -428,13 +407,13 @@ class UIMain():
             print(f"Error refreshing buy time: {e}")
 
     def BuyToggle(self, checked):
-        if self.IsExpiredTimeStamp():
-            return
-        
         try:
             self.buyToggle = checked
         except Exception as e:
             print(f"Error toggling buy: {e}")
+
+    def ClickSendBuy(self):
+        self.server.WXPurchase()
 
     def UpdateBuy(self):
         try:
@@ -451,9 +430,6 @@ class UIMain():
             print(f"Error updating buy: {e}")
 
     def HelpToggle(self, checked):
-        if self.IsExpiredTimeStamp():
-            return
-        
         try:
             self.helpToggle = checked
         except Exception as e:
@@ -467,6 +443,12 @@ class UIMain():
             self.helpTimeInverval = time
         except Exception as e:
             print(f"Error refreshing help time: {e}")
+
+    def ClickSendHelp(self):
+        userData = self.Data.GetRandomUser()
+        helpData = self.Data.helpData
+        contents = helpData.contents[helpData.selectIndex][1]
+        self.server.WXSpeak(userData.client, random.choice(contents))
 
     def UpdateHelp(self):
         try:
@@ -486,9 +468,6 @@ class UIMain():
             print(f"Error updating help: {e}")
 
     def ClickHelpSelectIndex(self, index):
-        if self.IsExpiredTimeStamp():
-            return
-        
         try:
             self.Data.helpData.selectIndex = index
             self.RefreshHelp()
@@ -521,9 +500,6 @@ class UIMain():
             print(f"Error changing help title: {e}")
     
     def ClickSaveHelp(self):
-        if self.IsExpiredTimeStamp():
-            return
-        
         self.Data.SaveDataByType(TYPE_HELP)
 
     def ClickHelpAdd(self):
@@ -531,13 +507,14 @@ class UIMain():
         self.RefreshHelp()
 
     def DanmuToggle(self, checked):
-        if self.IsExpiredTimeStamp():
-            return
-        
         try:
             self.danmuToggle = checked
         except Exception as e:
             print(f"Error toggling danmu: {e}")
+
+    def ClickSendDanmu(self):
+        userData = self.Data.GetRandomUser()
+        self.server.WXDanmu(userData.client)
 
     def UpdateDanmu(self):
         try:

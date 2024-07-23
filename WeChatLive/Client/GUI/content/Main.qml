@@ -43,9 +43,16 @@ Window {
     signal clickSaveHelp()
     signal clickNotice()
 
+    signal clickSendWellCome()
+    signal clickSendHelp()
+    signal clickSendScreen()
+    signal clickSendDanmu()
+    signal clickSendLike()
+    signal clickSendBuy()
+
     Component.onCompleted:
     {
-        //refreshLogin([{nickname: "你好ssssssdfsdfsdfssssss", avatar: "images/L1.png"},{nickname: "你好2", avatar: "images/L1.png"}])
+        refreshLogin([{nickname: "你好ssssssdfsdfsdfssssss", avatar: "images/L1.png"},{nickname: "你好2", avatar: "images/L1.png",nickname: "你好ssssssdfsdfsdfssssss", avatar: "images/L1.png"},{nickname: "你好2", avatar: "images/L1.png",nickname: "你好ssssssdfsdfsdfssssss", avatar: "images/L1.png"},{nickname: "你好2", avatar: "images/L1.png",nickname: "你好ssssssdfsdfsdfssssss", avatar: "images/L1.png"},{nickname: "你好2", avatar: "images/L1.png",nickname: "你好ssssssdfsdfsdfssssss", avatar: "images/L1.png"},{nickname: "你好2", avatar: "images/L1.png",nickname: "你好ssssssdfsdfsdfssssss", avatar: "images/L1.png"},{nickname: "你好2", avatar: "images/L1.png",nickname: "你好ssssssdfsdfsdfssssss", avatar: "images/L1.png"},{nickname: "你好2", avatar: "images/L1.png",nickname: "你好ssssssdfsdfsdfssssss", avatar: "images/L1.png"},{nickname: "你好2", avatar: "images/L1.png",nickname: "你好ssssssdfsdfsdfssssss", avatar: "images/L1.png"},{nickname: "你好2", avatar: "images/L1.png",nickname: "你好ssssssdfsdfsdfssssss", avatar: "images/L1.png"},{nickname: "你好2", avatar: "images/L1.png",nickname: "你好ssssssdfsdfsdfssssss", avatar: "images/L1.png"},{nickname: "你好2", avatar: "images/L1.png",nickname: "你好ssssssdfsdfsdfssssss", avatar: "images/L1.png"},{nickname: "你好2", avatar: "images/L1.png",nickname: "你好ssssssdfsdfsdfssssss", avatar: "images/L1.png"},{nickname: "你好2", avatar: "images/L1.png",nickname: "你好ssssssdfsdfsdfssssss", avatar: "images/L1.png"},{nickname: "你好2", avatar: "images/L1.png",nickname: "你好ssssssdfsdfsdfssssss", avatar: "images/L1.png"},{nickname: "你好2", avatar: "images/L1.png",nickname: "你好ssssssdfsdfsdfssssss", avatar: "images/L1.png"},{nickname: "你好2", avatar: "images/L1.png",nickname: "你好ssssssdfsdfsdfssssss", avatar: "images/L1.png"},{nickname: "你好2", avatar: "images/L1.png",nickname: "你好ssssssdfsdfsdfssssss", avatar: "images/L1.png"},{nickname: "你好2", avatar: "images/L1.png"}])
         //refreshHelpContent([{content:"你好"},{content:"我好"}])
         //setWellComeModel(["a","b"])
         //setHelpTitleText(["aa","bb"])
@@ -220,7 +227,7 @@ Window {
     // 定义一个计时器，用于重置canClick变量
     Timer {
         id: clickTimer
-        interval: 1000  // 1秒
+        interval: 3000  // 1秒
         repeat: false
         onTriggered: canClick = true
     }
@@ -512,301 +519,309 @@ Window {
                     }
                 }
 
-                Column {
-                    id: helpSelectColumn2
-                    x: 427
-                    y: 339
-                    anchors.fill: parent
-                    anchors.rightMargin: 8
-                    anchors.bottomMargin: 8
-                    anchors.leftMargin: 8
-                    anchors.topMargin: 65
-                    spacing: 1
-                    Repeater {
-                        FocusScope {
-                            width: 386
-                            height: 61
-                            Rectangle {
-                                x: 0
-                                y: 0
+                ScrollView {
+                    id: scrollView4
+                    x: 8
+                    y: 65
+                    width: 386
+                    height: 650
+
+                    Column {
+                        id: helpSelectColumn2
+                        x: 0
+                        y: 0
+                        anchors.fill: parent
+                        anchors.rightMargin: 0
+                        anchors.bottomMargin: 0
+                        anchors.leftMargin: 0
+                        anchors.topMargin: 0
+                        spacing: 1
+                        Repeater {
+                            FocusScope {
                                 width: 386
                                 height: 61
-                                color: "#fafafa"
-                                //color: "#ffffff"
-                                //border.color: "#7c7c7c"
-                                radius: 10
+                                Rectangle {
+                                    x: 0
+                                    y: 0
+                                    width: 386
+                                    height: 61
+                                    color: "#fafafa"
+                                    //color: "#ffffff"
+                                    //border.color: "#7c7c7c"
+                                    radius: 10
 
 
-                                Item {
-                                    id: login_item_login_none
-                                    anchors.fill: parent
-                                    visible: model.parentModel.state === 0
-                                    Rectangle {
-                                        id: rectangle17
-                                        color: "#fafafa"
-                                        radius: 10
-                                        border.color: "#dcdcdc"
-                                        border.width: 0
+                                    Item {
+                                        id: login_item_login_none
                                         anchors.fill: parent
-
-                                        MouseArea {
-                                            anchors.fill: parent
-                                            onClicked: clickdOpenWeChat()
-                                            onPressed: {rectangle17.scale = 0.95}
-                                            onReleased: {rectangle17.scale = 1}
-                                        }
-
-                                        Text {
-                                            id: text7
-                                            color: "#7a7d94"
-                                            text: qsTr("登录")
-                                            anchors.fill: parent
-                                            font.pixelSize: 24
-                                            horizontalAlignment: Text.AlignHCenter
-                                            verticalAlignment: Text.AlignVCenter
-                                            font.bold: true
-                                            font.family: "Arial"
-                                        }
-                                    }
-                                }
-
-                                Item {
-                                    id: login_item_login
-                                    x: 6
-                                    y: 71
-                                    anchors.fill: parent
-
-                                    visible: model.parentModel.state === 1
-
-                                    ComboBox {
-                                        id: login_comboBox
-                                        currentIndex: 0
-                                        x: 137
-                                        width: 196
-                                        height: 32
-                                        anchors.verticalCenter: parent.verticalCenter
-                                        anchors.verticalCenterOffset: 0
-                                        editable: true
-                                        font.capitalization: Font.MixedCase
-                                        font.pointSize: 14
-                                        font.family: "Noto Sans S Chinese Light"
-                                        font.styleName: "Regular"
-                                        model: childrenModel
-                                        background: Rectangle {
-                                            width: login_comboBox.width
-                                            height: login_comboBox.height
+                                        visible: model.parentModel.state === 0
+                                        Rectangle {
+                                            id: rectangle17
                                             color: "#fafafa"
-                                            border.color: "#ededed"
-                                            border.width: 1
-                                            radius: 4
-
-                                            Row {
-                                                anchors.fill: parent
-                                                spacing: 0
-                                                padding: 0
-
-                                                Rectangle {
-                                                    width: 0
-                                                    height: 0
-                                                    color: "transparent"
-                                                }
-                                            }
+                                            radius: 10
+                                            border.color: "#dcdcdc"
+                                            border.width: 0
+                                            anchors.fill: parent
 
                                             MouseArea {
                                                 anchors.fill: parent
-                                                onClicked: {
-                                                    login_comboBox.popup.visible = true
-                                                }
-                                            }
-
-                                        }
-
-                                        contentItem: TextField {
-                                            text: login_comboBox.currentText
-                                            font.pixelSize: 14
-                                            color: "#646464"
-                                            background: Rectangle {
-                                                color: "transparent"
-                                                border.color: "transparent"
-                                                radius: 4
-                                            }
-                                            padding: 0
-                                        }
-
-                                        indicator: Item {
-                                            width: 24
-                                            height: 24
-                                            anchors.right: parent.right
-                                            anchors.rightMargin: 5
-                                            Rectangle {
-                                                width: parent.width
-                                                height: parent.height
-                                                color: "transparent"
-
-                                                Image {
-                                                    source: "" // 替换为实际箭头图标路径
-                                                    anchors.centerIn: parent
-                                                    width: 10
-                                                    height: 10 // 设置箭头颜色
-                                                }
-                                            }
-                                        }
-
-                                        Image {
-                                            id: image21
-                                            anchors.fill: parent
-                                            source: "images/图层 3.png"
-                                            fillMode: Image.Stretch
-                                        }
-
-                                        delegate: ItemDelegate {
-                                            width: login_comboBox.width
-                                            height: 25
-                                            background: Rectangle {
-                                                id: bg
-                                                color: hovered ? "#eceaff" : "transparent"
-                                                anchors.fill: parent
+                                                onClicked: clickdOpenWeChat()
+                                                onPressed: {rectangle17.scale = 0.95}
+                                                onReleased: {rectangle17.scale = 1}
                                             }
 
                                             Text {
-                                                text: model.content
-                                                x : 5
-                                                color: "#646464"  // 设置字体颜色
-                                                font.pixelSize: 14
-                                                font.family: "Noto Sans S Chinese Light"
-                                                anchors.verticalCenter: parent.verticalCenter
-                                                //anchors.leftMargin: parent
-                                            }
-
-                                            onClicked: {
-                                                login_comboBox.currentIndex = index
-                                                login_comboBox.popup.visible = false
+                                                id: text7
+                                                color: "#7a7d94"
+                                                text: qsTr("登录")
+                                                anchors.fill: parent
+                                                font.pixelSize: 24
+                                                horizontalAlignment: Text.AlignHCenter
+                                                verticalAlignment: Text.AlignVCenter
+                                                font.bold: true
+                                                font.family: "Arial"
                                             }
                                         }
-                                    }
-
-
-                                    Text {
-                                        id: login_item_login_name
-                                        x: 60
-                                        y: 12
-                                        width: 60
-                                        height: 38
-                                        color: "#81859a"
-                                        text: model.parentModel.nickname
-                                        anchors.verticalCenter: parent.verticalCenter
-                                        font.pixelSize: 14
-                                        wrapMode: Text.Wrap
-                                        clip: true
-                                        anchors.verticalCenterOffset: 0
-                                        font.bold: false
-                                        font.family: "Noto Sans S Chinese Medium"
-                                    }
-
-                                    Image {
-                                        id: image19
-                                        x: 347
-                                        y: 15
-                                        height: 32
-                                        source: "images/图层 2.png"
-                                        fillMode: Image.PreserveAspectFit
-
-                                        MouseArea {
-                                            anchors.fill: parent
-                                            anchors.rightMargin: 0
-                                            anchors.bottomMargin: 0
-                                            anchors.leftMargin: 0
-                                            anchors.topMargin: 0
-
-                                            onClicked:
-                                            {
-                                                if (canClick) {
-                                                    canClick = false
-                                                    clickTimer.start()
-                                                    clickSendUserMsg(model.index, login_comboBox.currentText)
-                                                }
-                                            }
-                                            onPressed: image19.scale = 0.9
-                                            onReleased: image19.scale = 1
-                                        }
-                                    }
-
-                                    Image {
-                                        id: image17
-                                        y: 56
-                                        height: 2
-                                        anchors.left: parent.left
-                                        anchors.right: parent.right
-                                        source: "images/矩形 7 拷贝 9.png"
-                                        anchors.rightMargin: 0
-                                        anchors.leftMargin: 0
-                                        fillMode: Image.Stretch
                                     }
 
                                     Item {
-                                        id: item2
-                                        x: 16
-                                        y: 81
+                                        id: login_item_login
+                                        x: 6
+                                        y: 71
                                         anchors.fill: parent
-                                        anchors.rightMargin: 337
-                                        anchors.leftMargin: 10
-                                        anchors.bottomMargin: 10
-                                        anchors.topMargin: 10
 
+                                        visible: model.parentModel.state === 1
 
+                                        ComboBox {
+                                            id: login_comboBox
+                                            currentIndex: 0
+                                            x: 137
+                                            width: 196
+                                            height: 32
+                                            anchors.verticalCenter: parent.verticalCenter
+                                            anchors.verticalCenterOffset: 0
+                                            editable: true
+                                            font.capitalization: Font.MixedCase
+                                            font.pointSize: 14
+                                            font.family: "Noto Sans S Chinese Light"
+                                            font.styleName: "Regular"
+                                            model: childrenModel
+                                            background: Rectangle {
+                                                width: login_comboBox.width
+                                                height: login_comboBox.height
+                                                color: "#fafafa"
+                                                border.color: "#ededed"
+                                                border.width: 1
+                                                radius: 4
 
-                                        Image {
-                                            id: login_item_login_icon
-                                            x: 3
-                                            y: 3
-                                            width: 37
-                                            height: 37
-                                            source: model.parentModel.avatar
-                                            anchors.bottomMargin: 0
-                                            anchors.leftMargin: 0
-                                            anchors.topMargin: 0
-                                            anchors.rightMargin: 0
-                                            visible: true
+                                                Row {
+                                                    anchors.fill: parent
+                                                    spacing: 0
+                                                    padding: 0
+
+                                                    Rectangle {
+                                                        width: 0
+                                                        height: 0
+                                                        color: "transparent"
+                                                    }
+                                                }
+
+                                                MouseArea {
+                                                    anchors.fill: parent
+                                                    onClicked: {
+                                                        login_comboBox.popup.visible = true
+                                                    }
+                                                }
+
+                                            }
+
+                                            contentItem: TextField {
+                                                text: login_comboBox.currentText
+                                                font.pixelSize: 14
+                                                color: "#646464"
+                                                background: Rectangle {
+                                                    color: "transparent"
+                                                    border.color: "transparent"
+                                                    radius: 4
+                                                }
+                                                padding: 0
+                                            }
+
+                                            indicator: Item {
+                                                width: 24
+                                                height: 24
+                                                anchors.right: parent.right
+                                                anchors.rightMargin: 5
+                                                Rectangle {
+                                                    width: parent.width
+                                                    height: parent.height
+                                                    color: "transparent"
+
+                                                    Image {
+                                                        source: "" // 替换为实际箭头图标路径
+                                                        anchors.centerIn: parent
+                                                        width: 10
+                                                        height: 10 // 设置箭头颜色
+                                                    }
+                                                }
+                                            }
+
+                                            Image {
+                                                id: image21
+                                                anchors.fill: parent
+                                                source: "images/图层 3.png"
+                                                fillMode: Image.Stretch
+                                            }
+
+                                            delegate: ItemDelegate {
+                                                width: login_comboBox.width
+                                                height: 25
+                                                background: Rectangle {
+                                                    id: bg
+                                                    color: hovered ? "#eceaff" : "transparent"
+                                                    anchors.fill: parent
+                                                }
+
+                                                Text {
+                                                    text: model.content
+                                                    x : 5
+                                                    color: "#646464"  // 设置字体颜色
+                                                    font.pixelSize: 14
+                                                    font.family: "Noto Sans S Chinese Light"
+                                                    anchors.verticalCenter: parent.verticalCenter
+                                                    //anchors.leftMargin: parent
+                                                }
+
+                                                onClicked: {
+                                                    login_comboBox.currentIndex = index
+                                                    login_comboBox.popup.visible = false
+                                                }
+                                            }
                                         }
 
-                                        //                                            OpacityMask{
-                                        //                                                anchors.fill: rectangle
-                                        //                                                source : login_item_login_icon
-                                        //                                                maskSource: rectangle
-                                        //                                            }
-                                        Rectangle {
-                                            id: rectangle
-                                            x: 0
-                                            y: 0
-                                            width: 43
-                                            height: 43
-                                            color: "#002b5362"
-                                            radius: 10
-                                            border.color: "#ffffff"
-                                            border.width: 4
+
+                                        Text {
+                                            id: login_item_login_name
+                                            x: 60
+                                            y: 12
+                                            width: 60
+                                            height: 38
+                                            color: "#81859a"
+                                            text: model.parentModel.nickname
+                                            anchors.verticalCenter: parent.verticalCenter
+                                            font.pixelSize: 14
+                                            wrapMode: Text.Wrap
+                                            clip: true
+                                            anchors.verticalCenterOffset: 0
+                                            font.bold: false
+                                            font.family: "Noto Sans S Chinese Medium"
                                         }
+
                                         Image {
-                                            id: image2
-                                            x: 26
-                                            y: -6
-                                            width: 20
-                                            height: 20
-                                            source: "images/图层 4.png"
+                                            id: image19
+                                            x: 347
+                                            y: 15
+                                            height: 32
+                                            source: "images/图层 2.png"
                                             fillMode: Image.PreserveAspectFit
+
+                                            MouseArea {
+                                                anchors.fill: parent
+                                                anchors.rightMargin: 0
+                                                anchors.bottomMargin: 0
+                                                anchors.leftMargin: 0
+                                                anchors.topMargin: 0
+
+                                                onClicked:
+                                                {
+                                                    if (canClick) {
+                                                        canClick = false
+                                                        clickTimer.start()
+                                                        clickSendUserMsg(model.index, login_comboBox.currentText)
+                                                    }
+                                                }
+                                                onPressed: image19.scale = 0.9
+                                                onReleased: image19.scale = 1
+                                            }
                                         }
+
+                                        Image {
+                                            id: image17
+                                            y: 56
+                                            height: 2
+                                            anchors.left: parent.left
+                                            anchors.right: parent.right
+                                            source: "images/矩形 7 拷贝 9.png"
+                                            anchors.rightMargin: 0
+                                            anchors.leftMargin: 0
+                                            fillMode: Image.Stretch
+                                        }
+
+                                        Item {
+                                            id: item2
+                                            x: 16
+                                            y: 81
+                                            anchors.fill: parent
+                                            anchors.rightMargin: 337
+                                            anchors.leftMargin: 10
+                                            anchors.bottomMargin: 10
+                                            anchors.topMargin: 10
+
+
+
+                                            Image {
+                                                id: login_item_login_icon
+                                                x: 3
+                                                y: 3
+                                                width: 37
+                                                height: 37
+                                                source: model.parentModel.avatar
+                                                anchors.bottomMargin: 0
+                                                anchors.leftMargin: 0
+                                                anchors.topMargin: 0
+                                                anchors.rightMargin: 0
+                                                visible: true
+                                            }
+
+                                            //                                            OpacityMask{
+                                            //                                                anchors.fill: rectangle
+                                            //                                                source : login_item_login_icon
+                                            //                                                maskSource: rectangle
+                                            //                                            }
+                                            Rectangle {
+                                                id: rectangle
+                                                x: 0
+                                                y: 0
+                                                width: 43
+                                                height: 43
+                                                color: "#002b5362"
+                                                radius: 10
+                                                border.color: "#ffffff"
+                                                border.width: 4
+                                            }
+                                            Image {
+                                                id: image2
+                                                x: 26
+                                                y: -6
+                                                width: 20
+                                                height: 20
+                                                source: "images/图层 4.png"
+                                                fillMode: Image.PreserveAspectFit
+                                            }
+                                        }
+
+
+
+
+
+
                                     }
 
-
-
-
-
-
                                 }
-
                             }
-                        }
-                        model: ListModel {
-                            id: loginListModel
+                            model: ListModel {
+                                id: loginListModel
+                            }
                         }
                     }
                 }
@@ -1271,54 +1286,13 @@ Window {
                     }
                 }
 
-                CheckBox {
-                    id: checkBox9
-                    x: 290
-                    y: 120
-                    width: 100
-                    height: 20
-                    text: qsTr("自动切换")
-                    indicator: Rectangle {
-                        width: 20
-                        height: 20
-                        color: checkBox9.checked ? "#65896f" : "transparent"
-                        radius: 5
-                        border.color: "#b7b7b7"
-                        Text {
-                            color: "#ffffff"
-                            text: checkBox9.checked ? "\u2713" : ""
-                            font.pixelSize: 16
-                            anchors.centerIn: parent
-                        }
-                    }
-                    contentItem: Text {
-                        width: 70
-                        height: 40
-                        color: "#81859a"
-                        text: "自动回复"
-                        anchors.verticalCenter: parent.verticalCenter
-                        anchors.left: parent.left
-                        font.pixelSize: 16
-                        horizontalAlignment: Text.AlignLeft
-                        verticalAlignment: Text.AlignVCenter
-                        font.bold: true
-                        anchors.leftMargin: 20
-                        font.family: "Noto Sans S Chinese Medium"
-                    }
-                    scale: 1
-
-                    onCheckedChanged: {
-                        wellComeReplayToggle(checked)
-                    }
-                }
-
                 Rectangle {
                     id: rectangle5
                     x: 728
                     y: -47
                     width: 44
                     height: 30
-                    color: "#a499ff"
+                    color:canClick ? "#e59600" : "#787878"
                     radius: 2
                     border.width: 0
                     MouseArea {
@@ -1483,6 +1457,42 @@ Window {
                     }
                 }
 
+                Rectangle {
+                    id: rectangle14
+                    x: 308
+                    y: 118
+                    width: 65
+                    height: 25
+                    color: canClick ? "#e59600" : "#787878"
+                    radius: 2
+                    border.width: 0
+                    MouseArea {
+                        anchors.fill: parent
+                        anchors.bottomMargin: 0
+                        onClicked: {
+                            if (canClick) {
+                                canClick = false
+                                clickTimer.start()
+                                clickSendWellCome()
+                            }
+                        }
+                        onReleased: rectangle14.scale = 1
+                        onPressed: rectangle14.scale = 0.9
+                    }
+
+                    Text {
+                        id: text13
+                        color: "#ffffff"
+                        text: "点击发言"
+                        anchors.fill: parent
+                        font.pixelSize: 14
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                        font.family: "Noto Sans S Chinese Medium"
+                        anchors.bottomMargin: 0
+                    }
+                }
+
 
             }
 
@@ -1581,87 +1591,6 @@ Window {
                     }
                 }
 
-                CheckBox {
-                    id: checkBox12
-                    x: 290
-                    y: 70
-                    width: 100
-                    height: 20
-                    text: qsTr("自动切换")
-                    indicator: Rectangle {
-                        width: 20
-                        height: 20
-                        color: checkBox12.checked ? "#65896f" : "transparent"
-                        radius: 5
-                        border.color: "#b7b7b7"
-                        Text {
-                            color: "#ffffff"
-                            text: checkBox12.checked ? "\u2713" : ""
-                            font.pixelSize: 16
-                            anchors.centerIn: parent
-                        }
-                    }
-                    onCheckedChanged: {
-                        likeToggle(checked)
-                    }
-                    contentItem: Text {
-                        width: 70
-                        height: 40
-                        color: "#81859a"
-                        text: "自动点赞"
-                        anchors.verticalCenter: parent.verticalCenter
-                        anchors.left: parent.left
-                        font.pixelSize: 16
-                        horizontalAlignment: Text.AlignLeft
-                        verticalAlignment: Text.AlignVCenter
-                        font.bold: true
-                        anchors.leftMargin: 20
-                        font.family: "Noto Sans S Chinese Medium"
-                    }
-                    scale: 1
-                }
-
-                CheckBox {
-                    id: checkBox13
-                    x: 290
-                    y: 122
-                    width: 100
-                    height: 20
-                    text: qsTr("自动切换")
-                    indicator: Rectangle {
-                        width: 20
-                        height: 20
-                        color: checkBox13.checked ? "#65896f" : "transparent"
-                        radius: 5
-                        border.color: "#b7b7b7"
-                        Text {
-                            color: "#ffffff"
-                            text: checkBox13.checked ? "\u2713" : ""
-                            font.pixelSize: 16
-                            anchors.centerIn: parent
-                        }
-                    }
-                    contentItem: Text {
-                        width: 70
-                        height: 40
-                        color: "#81859a"
-                        text: "自动购买"
-                        anchors.verticalCenter: parent.verticalCenter
-                        anchors.left: parent.left
-                        font.pixelSize: 16
-                        horizontalAlignment: Text.AlignLeft
-                        verticalAlignment: Text.AlignVCenter
-                        font.bold: true
-                        anchors.leftMargin: 20
-                        font.family: "Noto Sans S Chinese Medium"
-                    }
-                    scale: 1
-
-                    onCheckedChanged: {
-                        buyToggle(checked)
-                    }
-                }
-
                 Text {
                     x: 38
                     y: 74
@@ -1745,6 +1674,42 @@ Window {
                     }
                 }
 
+                Rectangle {
+                    id: rectangle21
+                    x: 313
+                    y: 68
+                    width: 65
+                    height: 25
+                    color: canClick ? "#e59600" : "#787878"
+                    radius: 2
+                    border.width: 0
+                    MouseArea {
+                        anchors.fill: parent
+                        anchors.bottomMargin: 0
+                        onClicked: {
+                            if (canClick) {
+                                canClick = false
+                                clickTimer.start()
+                                clickSendLike()
+                            }
+                        }
+                        onReleased: rectangle21.scale = 1
+                        onPressed: rectangle21.scale = 0.9
+                    }
+
+                    Text {
+                        id: text18
+                        color: "#ffffff"
+                        text: qsTr("点击点赞")
+                        anchors.fill: parent
+                        font.pixelSize: 14
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                        font.family: "Noto Sans S Chinese Light"
+                        anchors.bottomMargin: 0
+                    }
+                }
+
                 Text {
                     x: 38
                     y: 126
@@ -1756,6 +1721,43 @@ Window {
                     font.bold: true
                     font.family: "Noto Sans S Chinese Medium"
                 }
+
+                Rectangle {
+                    id: rectangle26
+                    x: 313
+                    y: 120
+                    width: 65
+                    height: 25
+                    color: canClick ? "#e59600" : "#787878"
+                    radius: 2
+                    border.width: 0
+                    MouseArea {
+                        anchors.fill: parent
+                        anchors.bottomMargin: 0
+                        onClicked: {
+                                            if (canClick) {
+                                                canClick = false
+                                                clickTimer.start()
+                                                clickSendBuy()
+                                            }
+                                        }
+                        onReleased: rectangle26.scale = 1
+                        onPressed: rectangle26.scale = 0.9
+                    }
+
+                    Text {
+                        id: text19
+                        color: "#ffffff"
+                        text: qsTr("点击购买")
+                        anchors.fill: parent
+                        font.pixelSize: 14
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                        font.family: "Noto Sans S Chinese Light"
+                        anchors.bottomMargin: 0
+                    }
+                }
+
 
 
 
@@ -1922,46 +1924,6 @@ Window {
                                 }
                             }
                         }
-                    }
-                }
-
-                CheckBox {
-                    id: checkBox11
-                    x: 295
-                    y: 50
-                    width: 100
-                    height: 20
-                    text: qsTr("自动切换")
-                    indicator: Rectangle {
-                        width: 20
-                        height: 20
-                        color: checkBox11.checked ? "#65896f" : "transparent"
-                        radius: 5
-                        border.color: "#b7b7b7"
-                        Text {
-                            color: "#ffffff"
-                            text: checkBox11.checked ? "\u2713" : ""
-                            font.pixelSize: 16
-                            anchors.centerIn: parent
-                        }
-                    }
-                    contentItem: Text {
-                        width: 70
-                        height: 40
-                        color: "#7a7d94"
-                        text: "自动发言"
-                        anchors.verticalCenter: parent.verticalCenter
-                        anchors.left: parent.left
-                        font.pixelSize: 16
-                        horizontalAlignment: Text.AlignLeft
-                        verticalAlignment: Text.AlignVCenter
-                        font.bold: true
-                        anchors.leftMargin: 20
-                        font.family: "Noto Sans S Chinese Medium"
-                    }
-                    scale: 1
-                    onCheckedChanged: {
-                        helpToggle(checked)
                     }
                 }
 
@@ -2195,6 +2157,42 @@ Window {
                     }
                 }
 
+                Rectangle {
+                    id: rectangle15
+                    x: 315
+                    y: 47
+                    width: 65
+                    height: 25
+                    color: canClick ? "#e59600" : "#787878"
+                    radius: 2
+                    border.width: 0
+                    MouseArea {
+                        anchors.fill: parent
+                        anchors.bottomMargin: 0
+                        onClicked: {
+                            if (canClick) {
+                                canClick = false
+                                clickTimer.start()
+                                clickSendHelp()
+                            }
+                        }
+                        onReleased: rectangle15.scale = 1
+                        onPressed: rectangle15.scale = 0.9
+                    }
+
+                    Text {
+                        id: text14
+                        color: "#ffffff"
+                        text: qsTr("点击发言")
+                        anchors.fill: parent
+                        font.pixelSize: 14
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                        font.family: "Noto Sans S Chinese Light"
+                        anchors.bottomMargin: 0
+                    }
+                }
+
 
 
             }
@@ -2264,45 +2262,39 @@ Window {
                     }
                 }
 
-                Switch {
-                    id: customSwitch1
-                    x: 198
-                    y: 12
-                    width: 47
-                    height: 26
-                    text: "\u5f00"
-                    onCheckedChanged: {
-                        danmuToggle(checked)
+                Rectangle {
+                    id: rectangle19
+                    x: 185
+                    y: 15
+                    width: 65
+                    height: 25
+                    color: canClick ? "#e59600" : "#787878"
+                    radius: 2
+                    border.width: 0
+                    MouseArea {
+                        anchors.fill: parent
+                        anchors.bottomMargin: 0
+                        onClicked: {
+                            if (canClick) {
+                                canClick = false
+                                clickTimer.start()
+                                clickSendDanmu()
+                            }
+                        }
+                        onReleased: rectangle19.scale = 1
+                        onPressed: rectangle19.scale = 0.9
                     }
-                    background: Rectangle {
-                        color: customSwitch1.checked ? "#e3f1ff" : "#E0E0E0"
-                        radius: 14
-                        border.color: "#bebebe"
-                        border.width: 0
-                        implicitWidth: 60
-                        implicitHeight: 30
-                    }
-                    indicator: Rectangle {
-                        x: customSwitch1.checked ? parent.width - width - 2 : 2
-                        y: 2
-                        width: 22
-                        height: 22
-                        color: customSwitch1.checked ? "#96bbff" : "white"
-                        radius: 15
-                        border.color: "#bdbdbd"
-                        border.width: 0
-                    }
-                    contentItem: Text {
-                        x: 6
-                        color: "#afafaf"
-                        text: customSwitch1.checked ? "开" : "关"
-                        anchors.verticalCenter: parent.verticalCenter
-                        horizontalAlignment: Text.AlignLeft
+
+                    Text {
+                        id: text17
+                        color: "#ffffff"
+                        text: qsTr("获取弹幕")
+                        anchors.fill: parent
+                        font.pixelSize: 14
+                        horizontalAlignment: Text.AlignHCenter
                         verticalAlignment: Text.AlignVCenter
-                        font.family: "Arial"
-                        font.bold: true
-                        font.pointSize: 8
-                        anchors.leftMargin: 10
+                        font.family: "Noto Sans S Chinese Light"
+                        anchors.bottomMargin: 0
                     }
                 }
             }
@@ -2464,48 +2456,6 @@ Window {
                         contentWidth: 0
                     }
                     anchors.rightMargin: 263
-                }
-
-                CheckBox {
-                    id: checkBox14
-                    x: 295
-                    y: 50
-                    width: 100
-                    height: 20
-                    text: qsTr("自动切换")
-                    indicator: Rectangle {
-                        width: 20
-                        height: 20
-                        color: checkBox14.checked ? "#65896f" : "transparent"
-                        radius: 5
-                        border.color: "#b7b7b7"
-                        Text {
-                            color: "#ffffff"
-                            text: checkBox14.checked ? "\u2713" : ""
-                            font.pixelSize: 16
-                            anchors.centerIn: parent
-                        }
-                    }
-                    contentItem: Text {
-                        width: 70
-                        height: 40
-                        color: "#81859a"
-                        text: "自动飘屏"
-                        anchors.verticalCenter: parent.verticalCenter
-                        anchors.left: parent.left
-                        font.pixelSize: 16
-                        horizontalAlignment: Text.AlignLeft
-                        verticalAlignment: Text.AlignVCenter
-                        styleColor: "#7a7d94"
-                        font.bold: true
-                        anchors.leftMargin: 20
-                        font.family: "Noto Sans S Chinese Medium"
-                    }
-                    scale: 1
-
-                    onCheckedChanged: {
-                        screenToggle(checked)
-                    }
                 }
 
                 Rectangle {
@@ -2693,7 +2643,77 @@ Window {
                         anchors.bottomMargin: 0
                     }
                 }
+
+                Rectangle {
+                    id: rectangle16
+                    x: 314
+                    y: 17
+                    width: 65
+                    height: 25
+                    color: "#a499ff"
+                    radius: 2
+                    border.width: 0
+                    MouseArea {
+                        anchors.fill: parent
+                        anchors.bottomMargin: 0
+                        onClicked: {
+                            fileDialog.fileDialogtype = "screen"
+                            fileDialog.open()
+                        }
+                        onReleased: rectangle16.scale = 1
+                        onPressed: rectangle16.scale = 0.9
+                    }
+
+                    Text {
+                        id: text15
+                        color: "#ffffff"
+                        text: qsTr("导入方案")
+                        anchors.fill: parent
+                        font.pixelSize: 14
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                        font.family: "Noto Sans S Chinese Light"
+                        anchors.bottomMargin: 0
+                    }
+                }
+
+                Rectangle {
+                    id: rectangle18
+                    x: 315
+                    y: 47
+                    width: 65
+                    height: 25
+                    color: canClick ? "#e59600" : "#787878"
+                    radius: 2
+                    border.width: 0
+                    MouseArea {
+                        anchors.fill: parent
+                        anchors.bottomMargin: 0
+                        onClicked: {
+                            if (canClick) {
+                                canClick = false
+                                clickTimer.start()
+                                clickSendScreen()
+                            }
+                        }
+                        onReleased: rectangle18.scale = 1
+                        onPressed: rectangle18.scale = 0.9
+                    }
+
+                    Text {
+                        id: text16
+                        color: "#ffffff"
+                        text: qsTr("点击飘屏")
+                        anchors.fill: parent
+                        font.pixelSize: 14
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                        font.family: "Noto Sans S Chinese Light"
+                        anchors.bottomMargin: 0
+                    }
+                }
             }
+
 
 
 
