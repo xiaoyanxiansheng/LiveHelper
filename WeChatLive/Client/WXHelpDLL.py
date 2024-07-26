@@ -44,6 +44,7 @@ class WXHelper():
     def sendMsg(self, clientId, msgData):
         try:
             self.mylib.sendHpSocketData(int(clientId), ctypes.c_char_p(msgData.encode()))
+            print(f"{clientId}_{msgData}")
         except Exception as e:
             print(f"Error sending message: {e}")
 
@@ -78,24 +79,27 @@ class WXHelper():
         except Exception as e:
             print(f"Error in clientClose: {e}")
 
-    def LiveSearch(self, client, query):
+    def LiveSearch(self, clientId, query):
         try:
             json_str = f'{{"type":112577,"data":{{"query":"{query}","last_buff":"0","scene":0}}}}'
-            self.sendMsg(client, json_str)
+            # self.sendMsg(clientId, json_str)
+            self.mylib.sendHpSocketData(int(clientId), ctypes.c_char_p(json_str.encode()))
         except Exception as e:
             print(f"Error in LiveSearch: {e}")
 
     def LiveSearch2(self, clientId, userName, lastBuff):
         try:
             json_str = f'{{"type":11266,"data":{{"username":"{userName}","last_buff":"{lastBuff}"}}}}'
-            self.sendMsg(clientId, json_str)
+            # self.sendMsg(clientId, json_str)
+            self.mylib.sendHpSocketData(int(clientId), ctypes.c_char_p(json_str.encode()))
         except Exception as e:
             print(f"Error in LiveSearch2: {e}")
 
     def JoinLive(self, clientId, objectId, objectNoceId, liveId):
         try:
             json_str = f'{{"type":112598,"data":{{"object_id":"{objectId}","object_nonce_id":"{objectNoceId}","live_id":"{liveId}"}}}}'
-            self.sendMsg(clientId, json_str)
+            # self.sendMsg(clientId, json_str)
+            self.mylib.sendHpSocketData(int(clientId), ctypes.c_char_p(json_str.encode()))
         except Exception as e:
             print(f"Error in JoinLive: {e}")
 
@@ -162,28 +166,20 @@ class WXHelper():
                 if "liveCookies" in data:
                     self.UserMsg(user.client, user.instructionContent)
                     self.server.OperationCompleted(clientId)
-                else:
-                    self.server.OperationCompleted(clientId)
 
             if user.instruction == TYPE_continuousSpeak:
                 if "liveCookies" in data:
                     self.UserMsg(user.client, user.instructionContent)
-                    self.server.OperationCompleted(clientId)
-                else:
                     self.server.OperationCompleted(clientId)
 
             if user.instruction == TYPE_purchase:
                 if "liveCookies" in data:
                     self.Buy(user.client)
                     self.server.OperationCompleted(clientId)
-                else:
-                    self.server.OperationCompleted(clientId)
 
             if user.instruction == TYPE_autoLikes:
                 if "liveCookies" in data:
                     self.Like(user.client, 5)
-                    self.server.OperationCompleted(clientId)
-                else:
                     self.server.OperationCompleted(clientId)
 
             if user.instruction == TYPE_Danmu:
@@ -208,8 +204,6 @@ class WXHelper():
                     else:
                         user.instructionContent = ""
                         self.server.OperationCompleted(clientId)
-                else:
-                    self.server.OperationCompleted(clientId)
 
             if user.instruction == TYPE_enterRoom:
                 if ("infoList" in data) and (len(data["infoList"]) > 0):
@@ -233,8 +227,6 @@ class WXHelper():
                     self.OnlineMember(clientId, dataCollect.liveInfo.objectId, dataCollect.liveInfo.objectNonceId, dataCollect.liveInfo.liveId)
                 elif "onlineMemberCount" in data:
                     dataCollect.liveInfo.onLineMember = data["onlineMemberCount"]
-                    self.server.OperationCompleted(clientId)
-                else:
                     self.server.OperationCompleted(clientId)
 
             return rinstruction

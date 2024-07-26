@@ -28,29 +28,35 @@ class UIMain():
         self.wellComeToggle = False
         self.wellComeReplyToggle = False
         self.wellComeTime = 0
-        self.wellComeTimeInverval = 5
+        self.wellComeTimeInverval = 3
 
         self.changeNickNameTime = 0
 
         self.screenTime = 0
-        self.screenTimeInverval = 5
+        self.screenTimeInverval = 3
         self.scrrenToggle = False
 
         self.likeToggle = False
         self.likeToggleTime = 0
-        self.likeToggleTimeInverval = 5
+        self.likeToggleTimeInverval = 3
 
         self.buyToggle = False
         self.buyTime = 0
-        self.buyTimeInverval = 5
+        self.buyTimeInverval = 3
 
         self.helpToggle = False
         self.helpTime = 0
-        self.helpTimeInverval = 5
+        self.helpTimeInverval = 3
 
         self.danmuToggle = False
         self.danmuTime = 0
-        self.danmuTimeInverval = 5
+        self.danmuTimeInverval = 2
+
+        self.enterLiveTime = 0
+        self.enterLiveTimeInverval = 5
+
+        self.saveTime = 0
+        self.saveTimeInverval = 5
 
         self.uiRoot = uiRoot
         self.uiRoot.signalTest.connect(self.signalTest)
@@ -81,10 +87,11 @@ class UIMain():
         self.uiRoot.clickSaveScreen.connect(self.ClickSaveScreen)
         self.uiRoot.clickNotice.connect(self.ClickNotice)
         self.uiRoot.clickScreenAdd.connect(self.ClickScreenAdd)
+        self.uiRoot.clickScreenRemove.connect(self.ClickScreenRemove)
         self.uiRoot.clickHelpAdd.connect(self.ClickHelpAdd)
+        self.uiRoot.clickHelpRemove.connect(self.ClickHelpRemove)
 
         self.startTimer()
-        self.startTimer5()
 
         self.wxhelper.WXHelpDLL_CallRecvHandler(self.CallRecvHandlerCall)
 
@@ -104,10 +111,6 @@ class UIMain():
     def startTimer(self):
         self.timer = threading.Timer(1.0, self.Update)
         self.timer.start()
-    
-    def startTimer5(self):
-        self.timer5 = threading.Timer(0.1, self.Update5)
-        self.timer5.start()
 
     def SelectFile(self, type, filePath):
         if self.IsExpiredTimeStamp():
@@ -240,17 +243,10 @@ class UIMain():
             self.UpdateBuy()
             self.UpdateDanmu()
             self.UpdateHelp()
+            self.UpdateScreen()
+            self.UpdateEnterLive()
+            self.UpdateSave()
             self.startTimer()
-        except Exception as e:
-            print(f"Error in update: {e}")
-
-    def Update5(self):
-        if IsExpiredTimeStamp():
-            return
-        
-        try:
-            self.UpdateScreen(0.1)
-            self.startTimer5()
         except Exception as e:
             print(f"Error in update: {e}")
 
@@ -324,19 +320,20 @@ class UIMain():
         except Exception as e:
             print(f"Error refreshing screen time: {e}")
 
-    def UpdateScreen(self , delta):
+    def UpdateScreen(self):
         try:
-            if not self.scrrenToggle:
+            userData = self.Data.GetRandomUser()
+            if userData is None or not self.scrrenToggle:
                 return
             
-            self.screenTime += delta
-            if self.screenTime < (self.screenTimeInverval / 10.0):
+            self.screenTime += 1
+            if self.screenTime < self.screenTimeInverval:
                 return
             
             self.screenTime = 0
             screenData = self.Data.screenData
             contents = screenData.contents[screenData.selectIndex][1]
-            self.server.WXContinuousSpeak(random.choice(contents))
+            self.server.WXContinuousSpeak(userData.client ,random.choice(contents))
         except Exception as e:
             print(f"Error updating screen: {e}")
 
@@ -353,12 +350,17 @@ class UIMain():
     def RefreshScreen(self):
         try:
             screenData = self.Data.screenData
-            self.uiRoot.setScreenSelectIndex(screenData.selectIndex)
-            contents = screenData.contents[screenData.selectIndex]
-            titles = [c[0] for c in screenData.contents]
-            self.uiRoot.setScreenTitleText(titles)
-            content = "\n".join(contents[1])
-            self.uiRoot.setScreenContentText(content)
+            if(len(screenData.contents) > 0):
+                self.uiRoot.setScreenSelectIndex(screenData.selectIndex)
+                contents = screenData.contents[screenData.selectIndex]
+                titles = [c[0] for c in screenData.contents]
+                self.uiRoot.setScreenTitleText(titles)
+                content = "\n".join(contents[1])
+                self.uiRoot.setScreenContentText(content)
+            else:
+                self.uiRoot.setScreenTitleText([])
+                self.uiRoot.setScreenContentText("空")
+
             self.uiRoot.setScreenTime(self.screenTimeInverval)
         except Exception as e:
             print(f"Error refreshing screen content: {e}")
@@ -384,6 +386,18 @@ class UIMain():
     def ClickScreenAdd(self):
         self.Data.screenData.contents.append(["新方案",""])
         self.RefreshScreen()
+
+    def ClickScreenRemove(self,index):
+        if(len(self.Data.screenData.contents) == 0):
+            return
+        
+        result = messagebox.askyesno("警告！！！", "是否删除")
+        if result:
+            self.Data.screenData.contents.pop(int(index))
+            self.Data.screenData.selectIndex = 0
+            self.RefreshScreen()
+        else:
+            pass
 
     def LikeTimeRefresh(self):
         try:
@@ -438,6 +452,10 @@ class UIMain():
 
     def UpdateBuy(self):
         try:
+            userData = self.Data.GetRandomUser()
+            if userData is None or not self.buyToggle:
+                return
+            
             if not self.buyToggle:
                 return
             
@@ -446,7 +464,7 @@ class UIMain():
                 return
             
             self.buyTime = 0
-            self.server.WXPurchase()
+            self.server.WXPurchase(userData.client)
         except Exception as e:
             print(f"Error updating buy: {e}")
 
@@ -470,7 +488,8 @@ class UIMain():
 
     def UpdateHelp(self):
         try:
-            if not self.helpToggle:
+            userData = self.Data.GetRandomUser()
+            if userData is None or not self.helpToggle:
                 return
             
             if self.helpTime < self.helpTimeInverval - 1:
@@ -478,7 +497,6 @@ class UIMain():
                 return
             
             self.helpTime = 0
-            userData = self.Data.GetRandomUser()
             helpData = self.Data.helpData
             contents = helpData.contents[helpData.selectIndex][1]
             self.server.WXSpeak(userData.client, random.choice(contents))
@@ -498,13 +516,17 @@ class UIMain():
     def RefreshHelp(self):
         try:
             helpData = self.Data.helpData
-            self.uiRoot.setHelpSelectIndex(helpData.selectIndex)
-            contents = helpData.contents[helpData.selectIndex]
-            titles = [c[0] for c in helpData.contents]
-            self.uiRoot.setHelpTitleText(titles)
-            content = "\n".join(contents[1])
-            self.uiRoot.setHelpContentText(content)
-            self.uiRoot.setHelpTime(self.helpTimeInverval)
+            if(len(helpData.contents) > 0):
+                self.uiRoot.setHelpSelectIndex(helpData.selectIndex)
+                contents = helpData.contents[helpData.selectIndex]
+                titles = [c[0] for c in helpData.contents]
+                self.uiRoot.setHelpTitleText(titles)
+                content = "\n".join(contents[1])
+                self.uiRoot.setHelpContentText(content)
+                self.uiRoot.setHelpTime(self.helpTimeInverval)
+            else:
+                self.uiRoot.setHelpTitleText([])
+                self.uiRoot.setHelpContentText("空")
         except Exception as e:
             print(f"Error refreshing help content: {e}")
 
@@ -529,6 +551,18 @@ class UIMain():
     def ClickHelpAdd(self):
         self.Data.helpData.contents.append(["新方案",""])
         self.RefreshHelp()
+
+    def ClickHelpRemove(self, index):
+        if(len(self.Data.helpData.contents) == 0):
+            return
+        
+        result = messagebox.askyesno("警告！！！", "是否删除")
+        if result:
+            self.Data.helpData.contents.pop(int(index))
+            self.Data.helpData.selectIndex = 0
+            self.RefreshHelp()
+        else:
+            pass
 
     def DanmuToggle(self, checked):
         if self.IsExpiredTimeStamp():
@@ -608,10 +642,41 @@ class UIMain():
         except Exception as e:
             print(f"Error reading file {file_path}: {e}")
 
+    def UpdateSave(self):
+        try: 
+            self.saveTime += 1
+            if self.saveTime < self.saveTimeInverval:
+                return
+            self.saveTime = 0
+
+            self.ClickSaveHelp()
+            self.ClickSaveScreen()
+        except Exception as e:
+            print(f"Error updating danmu: {e}")
+
+    def UpdateEnterLive(self):
+        try:
+            userData = self.Data.GetRandomUser()
+            if userData is None:
+                return
+            
+            if self.Data.liveInfo.nickname == "":
+                return
+
+            self.enterLiveTime += 1
+            if self.enterLiveTime < self.enterLiveTimeInverval:
+                return
+            self.enterLiveTime = 0
+            
+            self.server.WXEnterRoom(userData.client, self.Data.liveInfo.nickname)
+        except Exception as e:
+            print(f"Error updating screen: {e}")
+
+
     def TimeIntervalTips(self, time):
-        if time < self.GetTimeInvervalMin():
-            messagebox.showinfo("重要告知!!!", "登录微信数量不够！！！")
-            time = self.GetTimeInvervalMin()
+        # if time < self.GetTimeInvervalMin():
+        #     messagebox.showinfo("重要告知!!!", "登录微信数量不够！！！")
+        #     time = self.GetTimeInvervalMin()
         
         return time
 

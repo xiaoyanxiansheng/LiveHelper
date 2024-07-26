@@ -11,7 +11,7 @@ from WXVersionCheck import check_and_install_wechat, install_wechat
 
 class Server:
     def __init__(self, quit_application, lic):
-        self.useServer = True
+        self.useServer = False
         self.lic = lic
         self.quit_application = quit_application
         self.bindLiveNames = []
@@ -36,52 +36,57 @@ class Server:
 
     # 请求直播间列表 
     def RequestBindLiveNames(self):
-        url = f"http://110.40.38.21:5001/check/get-link-list?passport={self.lic}"
-        try:
-            response = requests.get(url)
-            if response.status_code == 200:
-                try:
-                    data = response.json()
-                    if(data['code'] != 0):
-                        messagebox.showinfo("服务器返回错误", data['message'])
-                        print("服务器返回错误: "+ data['message'])
-                    self.bindLiveNames.clear()
-                    if data['data']['list'] != None:
-                        for value in data['data']['list']:
-                            self.bindLiveNames.append(value['live_room_name'])
-                except ValueError:
-                    print("Error: Response is not in JSON format")
-            else:
-                print(f"Request failed with status code {response.status_code}")
-        except requests.RequestException as e:
-            print(f"Request failed: {e}")
+        if self.useServer:
+            url = f"http://110.40.38.21:5001/check/get-link-list?passport={self.lic}"
+            try:
+                response = requests.get(url)
+                if response.status_code == 200:
+                    try:
+                        data = response.json()
+                        if(data['code'] != 0):
+                            messagebox.showinfo("服务器返回错误", data['message'])
+                            print("服务器返回错误: "+ data['message'])
+                        self.bindLiveNames.clear()
+                        if data['data']['list'] != None:
+                            for value in data['data']['list']:
+                                self.bindLiveNames.append(value['live_room_name'])
+                    except ValueError:
+                        print("Error: Response is not in JSON format")
+                else:
+                    print(f"Request failed with status code {response.status_code}")
+            except requests.RequestException as e:
+                print(f"Request failed: {e}")
 
     # 绑定+进入
     def RequestBindEnterLive(self , liveName):
-        url = f"http://110.40.38.21:5001/check/check-link-num?passport={self.lic}&live_id={liveName}&live_room_name={liveName}"
-        try:
-            response = requests.get(url)
-            if response.status_code == 200:
-                try:
-                    data = response.json()
-                    if(data['code'] != 0):
-                        messagebox.showinfo("服务器返回错误", data['message'])
-                        print("服务器返回错误: "+ data['message'])
+        if self.useServer:
+            url = f"http://110.40.38.21:5001/check/check-link-num?passport={self.lic}&live_id={liveName}&live_room_name={liveName}"
+            try:
+                response = requests.get(url)
+                if response.status_code == 200:
+                    try:
+                        data = response.json()
+                        if(data['code'] != 0):
+                            messagebox.showinfo("服务器返回错误", data['message'])
+                            print("服务器返回错误: "+ data['message'])
 
-                    # 刷新绑定列表
-                    if data['data']['access']:
-                        self.RequestBindLiveNames()
+                        # 刷新绑定列表
+                        if data['data']['access']:
+                            self.RequestBindLiveNames()
 
-                    return data['data']['access']
-                except ValueError:
-                    print("Error: Response is not in JSON format")
+                        return data['data']['access']
+                    except ValueError:
+                        print("Error: Response is not in JSON format")
+                        return False
+                else:
+                    print(f"Request failed with status code {response.status_code}")
                     return False
-            else:
-                print(f"Request failed with status code {response.status_code}")
+            except requests.RequestException as e:
+                print(f"Request failed: {e}")
                 return False
-        except requests.RequestException as e:
-            print(f"Request failed: {e}")
-            return False
+        else:
+            self.bindLiveNames.append(liveName)
+            return True
 
     def run_forever(self):
         try:
@@ -132,21 +137,21 @@ class Server:
         except Exception as e:
             print(f"Error in WXSpeak: {e}")
 
-    def WXContinuousSpeak(self, content):
+    def WXContinuousSpeak(self, wxId, content):
         try:
             liveData = self.clientData.liveInfo.GetBaseLiveInfo()
             liveData["content"] = content
             liveData = json.dumps(liveData).replace('"', '\\"')
-            data = f'{{"type":"{TYPE_continuousSpeak}","message":"{liveData}","wx_id":"0"}}'
+            data = f'{{"type":"{TYPE_continuousSpeak}","message":"{liveData}","wx_id":"{self.WXID(wxId)}"}}'
             self.SendDataServerOrClient(data)
         except Exception as e:
             print(f"Error in WXContinuousSpeak: {e}")
 
-    def WXPurchase(self):
+    def WXPurchase(self , wxId):
         try:
             liveData = self.clientData.liveInfo.GetBaseLiveInfo()
             liveData = json.dumps(liveData).replace('"', '\\"')
-            data = f'{{"type":"{TYPE_purchase}","message":"{liveData}","wx_id":"0"}}'
+            data = f'{{"type":"{TYPE_purchase}","message":"{liveData}","wx_id":"{self.WXID(wxId)}"}}'
             self.SendDataServerOrClient(data)
         except Exception as e:
             print(f"Error in WXPurchase: {e}")
@@ -200,7 +205,6 @@ class Server:
         return self.bindLiveNames
 
     def SendDataServerOrClient(self, data):
-
         if check_and_install_wechat():
             result = messagebox.askyesno("微信版本错误！！！", "是否安装对应版本？")
             if result:

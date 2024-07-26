@@ -4,7 +4,7 @@ import os
 import platform
 
 # 设定规定的微信版本
-REQUIRED_WECHAT_VERSION = "3.9.10.20"  # 替换为你的规定版本
+REQUIRED_WECHAT_VERSION = "3.9.10.19"  # 替换为你的规定版本
 
 def get_running_wechat_version():
     for proc in psutil.process_iter(['pid', 'name']):

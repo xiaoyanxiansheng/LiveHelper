@@ -35,9 +35,11 @@ Window {
     signal helpContentChange(int selectIndex , string content)
     signal helpTitleChange(int selectIndex , string content)
     signal clickHelpAdd()
+    signal clickHelpRemove(int index)
     signal screenContentChange(int selectIndex, string content)
     signal screenTitleChange(int selectIndex, string content)
     signal clickScreenAdd()
+    signal clickScreenRemove(int index)
     signal selectFile(string type , string filePath)
     signal clickSaveScreen()
     signal clickSaveHelp()
@@ -46,12 +48,13 @@ Window {
     Component.onCompleted:
     {
         //refreshLogin([{nickname: "你好ssssssdfsdfsdfssssss", avatar: "images/L1.png"},{nickname: "你好2", avatar: "images/L1.png"}])
-        //refreshHelpContent([{content:"你好"},{content:"我好"}])
+        // refreshHelpContent([{content:"你好"},{content:"我好"}])
         //setWellComeModel(["a","b"])
         //setHelpTitleText(["aa","bb"])
         //refreshLoginMsg(["aa","bb"])
         //setExpiredDatetime("")
         //setLiveInfo("name", 'https://wx.qlogo.cn/finderhead/ver_1/qzFJ8uwgSNQ1Wd670uThCPxOLGBkrFjdZOALibFs0CA549ch415dclW4o8fVEG811sCMnTbYzILD34o7gtrs4LoaxbrGXHpLA1SyUR02IMsk/0', 1, 2, 3)
+        //setScreenTitleText(["aa","bb"])
     }
 
     function refreshLogin(loginInfos)
@@ -170,7 +173,7 @@ Window {
 
     function setScreenSelectIndex(index)
     {
-        screenSelectIndex = index
+        screenSelectColumn.screenSelectIndex = index
     }
 
     function setScreenTitleText(titles){
@@ -558,7 +561,7 @@ Window {
 
                                         Text {
                                             id: text7
-                                            color: "#7a7d94"
+                                            color: "#76ad68"
                                             text: qsTr("登录")
                                             anchors.fill: parent
                                             font.pixelSize: 24
@@ -1891,10 +1894,40 @@ Window {
                                     }
 
                                     Rectangle {
-                                        id: container11
+                                        id: container111
                                         x: 0
                                         y: 0
-                                        width: 116
+                                        width: 58
+                                        height: 30
+                                        visible: model.isAdd
+                                        color: "#fafafa"
+                                        MouseArea {
+                                            anchors.fill: parent
+                                            onClicked: {
+                                                clickHelpRemove(helpSelectColumn.helpSelectIndex)
+                                            }
+                                            onReleased: container111.scale = 1
+                                            onPressed: container111.scale = 0.9
+                                        }
+
+                                        Text {
+                                            id: text111
+                                            color: "#7a7d94"
+                                            text: qsTr("-")
+                                            anchors.fill: parent
+                                            font.pixelSize: 36
+                                            horizontalAlignment: Text.AlignHCenter
+                                            verticalAlignment: Text.AlignVCenter
+                                            font.bold: true
+                                            font.family: "Noto Sans S Chinese Medium"
+                                        }
+                                    }
+
+                                    Rectangle {
+                                        id: container11
+                                        x: 58
+                                        y: 0
+                                        width: 58
                                         height: 30
                                         visible: model.isAdd
                                         color: "#fafafa"
@@ -2427,10 +2460,39 @@ Window {
                                     }
 
                                     Rectangle {
-                                        id: container2
+                                        id: container3
                                         x: 0
                                         y: 0
-                                        width: 116
+                                        width: 58
+                                        height: 30
+                                        visible: model.isAdd
+                                        color: "#fafafa"
+                                        MouseArea {
+                                            anchors.fill: parent
+                                            onClicked: {
+                                                clickScreenRemove(screenSelectColumn.screenSelectIndex)
+                                            }
+                                            onReleased: container3.scale = 1
+                                            onPressed: container3.scale = 0.9
+                                        }
+
+                                        Text {
+                                            color: "#7a7d94"
+                                            text: qsTr("-")
+                                            anchors.fill: parent
+                                            font.pixelSize: 36
+                                            horizontalAlignment: Text.AlignHCenter
+                                            verticalAlignment: Text.AlignVCenter
+                                            font.bold: true
+                                            font.family: "Noto Sans S Chinese Medium"
+                                        }
+                                    }
+
+                                    Rectangle {
+                                        id: container2
+                                        x: 58
+                                        y: 0
+                                        width: 58
                                         height: 30
                                         visible: model.isAdd
                                         color: "#fafafa"
