@@ -626,6 +626,7 @@ Window {
                                         }
 
                                         contentItem: TextField {
+                                            id:login_comboBoxText
                                             text: login_comboBox.currentText
                                             font.pixelSize: 14
                                             color: "#646464"
@@ -728,7 +729,7 @@ Window {
                                                 if (canClick) {
                                                     canClick = false
                                                     clickTimer.start()
-                                                    clickSendUserMsg(model.index, login_comboBox.currentText)
+                                                    clickSendUserMsg(model.index, login_comboBoxText.text)
                                                 }
                                             }
                                             onPressed: image19.scale = 0.9
