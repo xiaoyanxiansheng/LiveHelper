@@ -162,6 +162,12 @@ class WXHelper():
 
             rinstruction = user.instruction
 
+            if user.instruction == TYPE_ChangeUserNickName:
+                if(data['status'] != 0 or data['op_status'] != 0):
+                    user.instructionContent = ""
+
+                self.server.OperationCompleted(clientId)
+
             if user.instruction == TYPE_speak:
                 if "liveCookies" in data:
                     self.UserMsg(user.client, user.instructionContent)

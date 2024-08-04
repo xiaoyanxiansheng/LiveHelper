@@ -11,6 +11,7 @@ TYPE_searchRoom = "searchRoom"
 TYPE_enterRoom = "enterLiveRoom"
 TYPE_operationCompleted = "operationCompleted"
 TYPE_Danmu = "getBarrage"
+TYPE_ChangeUserNickName = "ChangeUserNickName"
 
 TYPE_ERROR_SERVER = "TYPE_ERROR_SERVER"
 TYPE_ERROR_CLIENT = "TYPE_ERROR_CLIENT"

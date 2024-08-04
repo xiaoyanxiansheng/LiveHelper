@@ -17,6 +17,7 @@ Window {
     signal clickSearchLiveByName(string name)
     signal clickEnterLiveByName(string name)
     signal clickSendUserMsg(int index ,string msg)
+    signal clickChangeUserNameMsg(int index)
     signal likeToggle(bool checked)
     signal likeTimeRefresh()
     signal buyToggle(bool checked)
@@ -584,8 +585,8 @@ Window {
                                     ComboBox {
                                         id: login_comboBox
                                         currentIndex: 0
-                                        x: 137
-                                        width: 196
+                                        x: 171
+                                        width: 170
                                         height: 32
                                         anchors.verticalCenter: parent.verticalCenter
                                         anchors.verticalCenterOffset: 0
@@ -693,7 +694,7 @@ Window {
                                         id: login_item_login_name
                                         x: 60
                                         y: 12
-                                        width: 60
+                                        width: 69
                                         height: 38
                                         color: "#81859a"
                                         text: model.parentModel.nickname
@@ -710,6 +711,7 @@ Window {
                                         id: image19
                                         x: 347
                                         y: 15
+                                        width: 31
                                         height: 32
                                         source: "images/图层 2.png"
                                         fillMode: Image.PreserveAspectFit
@@ -796,6 +798,42 @@ Window {
                                             height: 20
                                             source: "images/图层 4.png"
                                             fillMode: Image.PreserveAspectFit
+                                        }
+                                    }
+
+                                    Rectangle {
+                                        id: rectangle14
+                                        x: 135
+                                        y: 17
+                                        width: 30
+                                        height: 28
+                                        color: "#a499ff"
+                                        radius: 2
+                                        border.width: 0
+                                        MouseArea {
+                                            anchors.fill: parent
+                                            onReleased: rectangle14.scale = 1
+                                            anchors.bottomMargin: 0
+                                            onClicked: {
+                                                if (canClick) {
+                                                    canClick = false
+                                                    clickTimer.start()
+                                                    clickChangeUserNameMsg(model.index)
+                                                }
+                                            }
+                                            onPressed: rectangle14.scale = 0.9
+                                        }
+
+                                        Text {
+                                            id: text13
+                                            color: "#ffffff"
+                                            text: qsTr("改名")
+                                            anchors.fill: parent
+                                            font.pixelSize: 14
+                                            horizontalAlignment: Text.AlignHCenter
+                                            verticalAlignment: Text.AlignVCenter
+                                            anchors.bottomMargin: 0
+                                            font.family: "Noto Sans S Chinese Light"
                                         }
                                     }
 

@@ -1,6 +1,6 @@
 from datetime import datetime
 import random
-from tkinter import Tk, messagebox
+from tkinter import Tk, messagebox, simpledialog
 from SPCloud import GetExpiredTimeStamp, IsExpiredTimeStamp
 from Server import *
 from WXHelpDLL import*
@@ -63,6 +63,7 @@ class UIMain():
         self.uiRoot.clickdOpenWeChat.connect(self.ClickOpenWeChat)
         self.uiRoot.clickSearchLiveByName.connect(self.ClickSearchLiveByName)
         self.uiRoot.clickSendUserMsg.connect(self.ClickSendUserMsg)
+        self.uiRoot.clickChangeUserNameMsg.connect(self.ClickChangeUserNameMsg)
         self.uiRoot.likeToggle.connect(self.LikeToggle)
         self.uiRoot.likeTimeRefresh.connect(self.LikeTimeRefresh)
         self.uiRoot.buyToggle.connect(self.BuyToggle)
@@ -171,6 +172,13 @@ class UIMain():
                         pass
             elif type == TYPE_enterRoom:
                 self.RefreshLive()
+            elif type == TYPE_ChangeUserNickName:
+                if user.instructionContent != "":
+                    user.nickname = user.instructionContent
+                    self.RefreshUserLogin()
+                    messagebox.showinfo("提示", "改名成功！！！")
+                else:
+                    messagebox.showinfo("警告", "改名失败！！！")
                 
         except Exception as e:
             print(f"Error in handle_result: {e}")
@@ -229,6 +237,26 @@ class UIMain():
                 self.server.WXSpeak(userData.client, content)
             else:
                 messagebox.showinfo("提示", "请先登录微信！！！")
+        except Exception as e:
+            print(f"Error sending user message: {e}")
+
+    def ClickChangeUserNameMsg(self , index):
+        if self.IsExpiredTimeStamp():
+            return
+        
+        try:
+            userData = self.Data.GetUsers()[index]
+            if userData:
+                user_input = simpledialog.askstring("修改微信名称！注意一天不要修改超过10次", userData.nickname)
+                if user_input:
+                    userData.instruction = TYPE_ChangeUserNickName
+                    userData.instructionContent = user_input
+                    self.wxhelper.ChangeNickName(userData.client, user_input)
+                else:
+                    pass
+            else:
+                messagebox.showinfo("提示", "请先登录微信！！！")
+
         except Exception as e:
             print(f"Error sending user message: {e}")
 
